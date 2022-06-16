@@ -1,0 +1,197 @@
+
+<div class="w3-row w3-padding-32">
+  <div class="w3-twothird w3-container w3-margin-top">
+    <h1 class="w3-text-teal">Lab 4: Joining Multiple Tables (<a href="lab_code/lab-join.Rmd" class="w3-text-grey">.Rmd</a>)</h1>
+
+
+    <p>
+      In this lab, we will learn how to join two tables together.
+    </p>
+    <pre class="r"><code>library(tidyverse)
+    library(babynames)</code></pre>
+    <p>
+      <strong>Goal</strong>: by the end of this lab, you will be able to use <code>inner_join()</code> and <code>left_join()</code> to combine data from two different tables.
+    </p>
+
+    <h3 class="w3-text-grey">Setup</h3>
+    <p>
+      In the <code>babynames</code> package, there is a table called <code>births</code>. It has just two columns:
+    </p>
+    <pre class="r"><code>head(births)</code></pre>
+    <p>
+      These data come from the U.S. Census Bureau (see <code>help(births)</code> for more information). For clarity, let's copy this table into a new object with a clearer name.
+    </p>
+    <pre class="r"><code>census_births &lt;- births</code></pre>
+    <p>
+      The information about baby names is stored in the <code>babynames</code> table that we have seen previously. These data come from the Social Security Administration (see <code>help(babynames)</code> for more details).
+    </p>
+    <p>
+      It stands to reason that the total number of births recorded by the Census Bureau should match the total number of births as recorded by the Social Security Administration. We will investigate this claim.
+    </p>
+    <p>
+      We have to do a little bit of work in order to condense the SSA data into the same yearly form as the Census Bureau data. We can do this with <code>group_by()</code> and <code>summarize()</code>.
+    </p>
+    <p>
+      Now we have two separate tables with what should ostensibly be the same information: <code>census_births</code> and <code>ssa_births</code>. Note that they don't cover the same set of years.
+    </p>
+    <pre class="r"><code>census_births %&gt;%
+      summarize(N = n(), 
+                earliest = min(year), 
+                latest = max(year))
+
+    ssa_births %&gt;%
+      summarize(N = n(), 
+                earliest = min(year), 
+                latest = max(year))</code></pre>
+  </div>
+</div>
+
+<div class="w3-row w3-padding-0">
+  <div class="w3-twothird w3-container w3-margin-top">
+
+    <h3 class="w3-text-grey">Using a join</h3>
+    <p>
+      The technique for combining two tables is called a &quot;join.&quot; There are several different kinds of joins, which we explore in this section. Our goal is to match rows from one table that correspond to rows in a different table.
+    </p>
+    <p>
+      Using an <code>inner_join()</code>, the only rows in the result set will be those with corresponding matches in <em>both</em> tables.
+    </p>
+    <pre class="r"><code>census_births %&gt;%
+      inner_join(ssa_births, by = &quot;year&quot;) %&gt;%
+      summarize(N = n(), 
+                earliest = min(year), 
+                latest = max(year))</code></pre>
+    <p>
+      Note that the set of years returns is the <em>intersection</em> of the two sets of years in the original tables.
+    </p>
+    <p>
+      Using a <code>left_join()</code>, the rows in <code>census_births</code> will always be returned, even if there is no corresponding entry in the <code>ssa_births</code> table. Rows with no corresponding entry have <code>NA</code>s that appear for the missing data.
+    </p>
+    <pre class="r"><code>total_births &lt;- census_births %&gt;%
+      left_join(ssa_births, by = &quot;year&quot;)
+
+    total_births %&gt;%
+      filter(is.na(births.y))</code></pre>
+    <p>
+      The data from 2012 exists in the <code>census_births</code> table, but not in the <code>ssa_births</code> table. Note that the set of years returns is no longer just the intersection.
+    </p>
+    <pre class="r"><code>total_births %&gt;%
+      summarize(N = n(), 
+                earliest = min(year), 
+                latest = max(year))</code></pre>
+    <p>
+      Conversely, using a <code>right_join()</code> will have the opposite effect. Now there are many years of SSA data that have no match in the Census data.
+    </p>
+    <pre class="r"><code>total_births &lt;- census_births %&gt;%
+      right_join(ssa_births, by = &quot;year&quot;)
+
+    total_births %&gt;%
+      filter(is.na(births.x))</code></pre>
+    <p>
+      The number of years present is also neither the intersection, nor the <em>union</em>.
+    </p>
+    <pre class="r"><code>total_births %&gt;%
+      summarize(N = n(), 
+                earliest = min(year), 
+                latest = max(year))</code></pre>
+    <p>
+      Switching the order of the tables and switching back to <code>right_join()</code> will have the same effect. That is, <code>left_join(a, b)</code> is equivalent to <code>right_join(b, a)</code>.
+    </p>
+    <pre class="r"><code>ssa_births %&gt;%
+      left_join(census_births, by = &quot;year&quot;) %&gt;%
+      summarize(N = n(), 
+                earliest = min(year), 
+                latest = max(year))</code></pre>
+    <p>
+      A <code>full_join()</code> returns all rows, regardless of whether they are matched.
+    </p>
+    <pre class="r"><code>total_births &lt;- census_births %&gt;%
+      full_join(ssa_births, by = &quot;year&quot;)
+
+    total_births %&gt;%
+      filter(is.na(births.x) | is.na(births.y))</code></pre>
+    <p>
+      Now the set of years returned is the union of the years in the two tables.
+    </p>
+    <pre class="r"><code>total_births %&gt;%
+      summarize(N = n(), 
+                earliest = min(year), 
+                latest = max(year))</code></pre>
+  </div>
+</div>
+
+<div class="w3-row w3-padding-0">
+  <div class="w3-twothird w3-container w3-margin-top">
+
+    <h3 class="w3-text-grey">Reconciliation</h3>
+    <p>
+      With the tables joined, we can compare the birth numbers directly. While they are strongly correlated,
+    </p>
+    <pre class="r"><code>total_births %&gt;%
+      summarize(N = n(), 
+                correlation = cor(births.x, births.y, 
+                                  use = &quot;complete.obs&quot;))</code></pre>
+    <p>
+      the numbers are <em>not</em> the same.
+    </p>
+    <pre class="r"><code>library(ggplot2)
+    ggplot(data = total_births, aes(x = year, y = births.x), color = &quot;red&quot;) +
+      geom_line() + 
+      geom_line(aes(y = births.y), color = &quot;blue&quot;)</code></pre>
+    <blockquote>
+      <p>
+        Do some detective work to find out why! <em>Hint: read the documentation for <code>babynames</code></em>.
+      </p>
+    </blockquote>  
+  </div>
+</div>
+
+<div class="w3-row w3-padding-0">
+  <div class="w3-twothird w3-container w3-margin-top">
+
+    <h3 class="w3-text-grey">Your turn!</h3>
+    <p>
+      Now let's try joining some tabvles from a dataset of your choosing. Don't have one? Try answering these questions using the <code>nycflights13</code> package.
+    </p>
+    <ol>
+      <li>
+        <p>
+          Compute the average arrival delay time for each carrier, and include the full name of the carrier in your result set.
+        </p>
+      </li>
+      <li>
+        <p>
+          What was the full name of the airport that was the most common destination from NYC in 2013?
+        </p>
+      </li>
+      <li>
+        <p>
+          What is the most commonly used plane? Find its manufacturer and model.
+        </p>
+      </li>
+      <li>
+        <p>
+          Were there any flights that went to &quot;mystery&quot; airports (i.e., airports that don't appear in the <code>airports</code> table)?
+        </p>
+      </li>
+      <li>
+        <p>
+          Were there any &quot;mystery&quot; planes (i.e., planes that don't appear in the <code>planes</code> table)?
+        </p>
+      </li>
+    </ol>
+  </div>
+</div>
+
+<div class="w3-row w3-padding-0">
+  <div class="w3-twothird w3-container w3-margin-top">
+    <p>
+      This lab was built for MassMutual DSDP by R. Jordan Crouser in June 2021, and was modified for the Smith College SSEP by Ab Mosca in June 2022.
+    </p>
+  </div>
+</div>
+
+
+
+
+

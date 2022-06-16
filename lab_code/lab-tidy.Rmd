@@ -1,0 +1,140 @@
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+In this lab, we will learn how to convert data tables into a tidy form. We will learn about functions in the `tidyr` package, which is part of the `tidyverse` meta-package. 
+
+```{r, message=FALSE}
+library(tidyverse)
+library(babynames)
+```
+
+**Goal**: by the end of this lab, you will understand what tidy data is and how to convert a wide table into a narrow table, and vice versa. 
+
+## What does `tidy` mean, and why do we care?
+
+**Tidy** data are usually long and narrow. That is, it may have many rows, but relatively few columns. However, data are often stored in spreadsheets in a **wide** format (which may have more columns that rows) because the wide format is easier to **see** in a spreadsheet.
+
+However, it turns out that there are lots of good reasons to keep data in a `tidy` format:
+
+#. Tools like `dplyr` and `ggplot2` expect tidy data. 
+#. It is basically the [Third Normal Form](https://en.wikipedia.org/wiki/Third_normal_form), which is the standard in relational databases (more on that later). 
+#. Now that we know how to wrangle and make simple visualizations, we don't need to see it all anyway. 
+
+## `tidyr`
+
+The `pivot_longer()` and `pivot_wider()` functions from the `tidyr` package are **huge** time-savers. (I don't know of any equivalent operation in Excel that can do what these functions do. Just imagine what you'd have to do in Excel? ::shudder::) 
+
+To recap:
+
+- `pivot_longer()` takes a data table in a **wide** format and converts it into a tidy format. 
+- `pivot_wider()` does the opposite (and accordingly, is used less frequently). 
+
+## An example: making wide tables narrow with `pivot_wider()`
+We (unwittingly) came up with an example yesterday. Recall that the `total_births` data frame looks like this:
+
+```{r}
+ssa_births <- babynames %>%
+  group_by(year) %>%
+  summarize(num_rows = n(), births = sum(n))
+
+total_births <- births %>%
+  left_join(ssa_births, by = "year")
+
+head(total_births)
+```
+
+Let's forget about `num_rows` and rename the variables.
+
+```{r}
+total_births <- total_births %>%
+  select(-num_rows) %>%
+  rename(census = births.x, ssa = births.y)
+```
+
+Each row corresponds to a single `year`, and for each year, we have two variables: `census` (from the Census) and `ssa` (from the SSA). This data frame is **not** tidy. (Why?) 
+
+This data frame has 109 rows and 3 columns:
+
+```{r}
+dim(total_births)
+```
+
+...but what we want is a data frame that has 218 rows and three columns: `year`, `source`, and `births`. This data frame would be tidy, because like is stored with like. The `pivot_longer()` function will help us get there.  
+
+```{r}
+births_tidy <- total_births %>%
+  pivot_longer(cols = c(ssa, census), 
+               names_to = "source", 
+               values_to = "births") %>%
+  arrange(year)
+
+head(births_tidy)
+
+dim(births_tidy)
+```
+
+See what happened? View `births_tidy` in several different ways if necessary, and make sure that you understand where each piece of data went. 
+
+Foreshadowing what we'll learn about data visualization in a couple of weeks, we can now map `year` to the x axis, `births`= to the y axis, and use color to encode the `source`:
+
+```{r}
+ggplot(data = births_tidy, aes(x = year, y = births, color = source)) +
+  geom_line() 
+```
+
+Note that even though we have two sources for birth numbers, the numbers themselves represent the same kind of thing. 
+
+### Now, with a little less hand-holding...
+
+Try this process out for yourself with a [Gapminder dataset](http://www.gapminder.org/data/). We'll walk you through it step-by-step using the "Prevalence of HIV, total (\% of population ages 15-49)" table, but feel free to choose any table that's interesting to you.
+
+#### Step 1:
+> Pick a dataset and download it as a CSV file.
+
+#### Step 2:
+> Read the CSV into R using `read_csv()`. Pay careful attention to the path names! Your code will look something like this:
+
+```{r}
+hiv <- read_csv("~/Downloads/sh_dyn_aids_zs.csv")
+```
+
+#### Step 3:
+
+> Get to know your data. Look at the first few rows. Use `dim()` to find the dimensions of your data frame. Make a note of these. 
+
+```{r}
+head(hiv)
+dim(hiv)
+```
+
+#### Step 4:
+
+> Take out a piece of paper and draw what you want your "tidy" data frame to look like. It should have three columns: `country`, `year`, and `value`. How many rows will it have? 
+
+#### Step 5:
+
+> Use `pivot_longer()` and/or `pivot_wider()` to convert your data into a tidy format. Check that it has the right dimensions. 
+
+```{r}
+hiv <- hiv %>%
+  pivot_longer(-country, 
+               names_to = "year", 
+               values_to = "est_prevalence") %>%
+  mutate(year = sub("X", "", year))
+```
+
+#### Step 6:
+
+> Say something interesting! Here's one example:
+
+```{r}
+hiv %>%
+  ggplot(aes(x = as.numeric(year), 
+             y = est_prevalence, 
+             group = country,
+             color = est_prevalence)) +
+  geom_line() +
+  xlim(c(1990, 2011))
+```
+

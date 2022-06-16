@@ -1,0 +1,353 @@
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+In this lab, we will learn how to write and apply user-defined functions.  
+
+```{r, message=FALSE}
+library(tidyverse)
+library(babynames)
+```
+
+**Goal**: by the end of this lab, you will be able to write a function in R and execute it.
+
+## Extending a single pipeline to a function
+
+We already know how to filter for a particular name:
+
+```{r}
+babynames %>%
+  filter(name == "Logan")
+```
+
+Suppose that we want to find the year in which that name was most popular. To do this, we need a pipeline that consists of several verbs chained together. 
+
+```{r}
+babynames %>%
+  filter(name == "Logan") %>%
+  group_by(year) %>%
+  summarize(total = sum(prop)) %>%
+  arrange(desc(total)) %>%
+  head(1) %>%
+  select(year)
+```
+
+But we might want to do this for many names, and it would be tedious to have to re-type -- or even just re-run -- the same code over and over again. An elegant solution is to write a function. For example, here we write a function called `most_popular_year()` that will return the year in which a specific name was most popular. 
+
+```{r}
+most_popular_year <- function(name_arg) {
+  babynames %>%
+    filter(name == name_arg) %>%
+    group_by(year) %>%
+    summarize(total = sum(prop)) %>%
+    arrange(desc(total)) %>%
+    head(1) %>%
+    select(year)
+}
+```
+
+Now we can run our function on several different names without having to re-type all of that code. Here we find the popularity of names associated with actors and actresses who won at the [89th Academy Awards](https://en.wikipedia.org/wiki/91st_Academy_Awards).
+
+```{r}
+most_popular_year("Olivia")
+most_popular_year("Regina")
+most_popular_year("Rami")
+most_popular_year("Mahershala")
+```
+
+## Signatures
+
+R doesn't have formal [type signatures](https://en.wikipedia.org/wiki/Type_signature) for its functions the way that some other programming languages do. However, being aware of what kind of objects your functions take, and what kind of objects your function returns, is usually very important. 
+
+You can always show the arguments that a given function takes by using the `formals()` function.
+
+```{r}
+formals(most_popular_year)
+```
+
+In this case, the `most_popular_year()` function takes a single argument called `name_arg`, which should be a character vector, and returns a `tbl_df`. 
+
+More details about functions that exist within packages are available via `help(name_of_function)`. 
+
+### Return values
+
+By default, an R function returns the result of the last command that is executed by the function. For `most_popular_year()`, there is only one "line" of code (i.e., the whole pipeline), and the result of that will be a `tbl_df`. 
+
+Alternatively, you can use `return(blah)` to explicitly return objects. (I think) that every R function returns something (i.e., there is no such thing as a ["void" function](https://en.wikipedia.org/wiki/Void_type)). 
+
+### Default argument values
+
+If you want an argument to your function have a default value, specify it in the function definition. 
+
+The way that we have defined `most_popular_year()`, there is no default value for `name_arg`. Thus, if we call the function with no arguments, it will break. 
+
+```{r}
+most_popular_year()
+```
+In this case, this is probably the desired behavior, since it doesn't make sense to call this function without specifying a name. However, we could have defined it with a default value, say `"Logan"`. 
+
+```{r}
+most_popular_year_with_default <- function(name_arg = "Logan") {
+  babynames %>%
+    filter(name == name_arg) %>%
+    group_by(year) %>%
+    summarize(total = sum(prop)) %>%
+    arrange(desc(total)) %>%
+    head(1) %>%
+    select(year)
+}
+```
+
+Now we can call the function without specifying the `name_arg` argument, but if we do so we'll always get the results for `"Logan"`. 
+
+```{r}
+most_popular_year_with_default()
+```
+
+We can still of course still override the default value of `name_arg`:
+
+```{r}
+most_popular_year_with_default(name_arg = "Jordan")
+```
+
+## Scoping
+
+How did our function know about the `babynames` table? Why wasn't that an input to the function? The answer to the first question involes the notion of [variable scoping](http://adv-r.had.co.nz/Functions.html#lexical-scoping), while the answer to the second question is a design choice. 
+
+The rules for variable scoping in R are...complicated. But what is important for you to understand is that R will look for objects in the global environment if it can't find them locally. So when we run `most_popular_year()`, R will look for a data frame called `babynames` in the global environment. If it exists, then the function should work, but if not, it won't. Thus, whether a user-defined function in R works as expected depends on what is in the global environment. This behavior is different than most compiled programming languages (e.g. C++, Java, etc.), but it is designed to make it easy to script with functions on-the-fly. 
+
+Note that if we unload the `babynames` package, thus removing the `babynames` table from the environment, our function no longer works. 
+
+```{r}
+detach("package:babynames", unload = TRUE)
+# should throw an error
+most_popular_year("Jordan")
+```
+
+Don't forget to bring `babynames` back.
+
+```{r}
+library(babynames)
+```
+
+To be more explicit, we could pass the table that we want to search for to the function. We can achieve this by re-writing the function to take a `data` argument:
+
+```{r, error=TRUE}
+most_popular_year_v2 <- function(data, name_arg) {
+  data %>%
+    filter(name == name_arg) %>%
+    group_by(year) %>%
+    summarize(total = sum(prop)) %>%
+    arrange(desc(total)) %>%
+    head(1) %>%
+    select(year)
+}
+# will throw error because we didn't specify "data"
+most_popular_year_v2(name_arg = "Logan")
+# works
+most_popular_year_v2(data = babynames, name_arg = "Logan")
+```
+
+This also enables us to apply our function to subsets of the original data. So we can search for the most popular year for `Logan` among boys and girls separately. 
+
+```{r}
+babynames %>%
+  filter(sex == "F") %>%
+  most_popular_year_v2(name_arg = "Logan")
+
+babynames %>%
+  filter(sex == "M") %>%
+  most_popular_year_v2(name_arg = "Logan")
+```
+
+Yay, tidy functions!
+
+## Order of arguments
+
+Note that the order of the arguments matters only if they are **not** named.
+
+```{r, error=TRUE}
+most_popular_year_v2(babynames, "Morganne")
+most_popular_year_v2("Morganne", babynames)
+most_popular_year_v2("Morganne", data = babynames)
+```
+
+To be safe (and explicit), name your arguments unless you have a good reason not to. 
+
+## Automating repetitive tasks
+
+Part of thinking like a data scientist is recognizing when to automate a task. Computers are really good at doing things repeatedly -- but not good at knowing what to do. Your job is to tell the computer what to do!
+
+We can save a lot of time by automating certain operations. In this lab we will discuss two main ways of iterating operations over a set of values. 
+
+## Applying a function to a vector of values
+
+Let's return to the `most_popular_year()` function that we defined previously. As a refresher, it looked like this:
+
+```{r}
+most_popular_year <- function(name_arg) {
+  babynames %>%
+    filter(name == name_arg) %>%
+    group_by(year) %>%
+    summarize(total = sum(prop)) %>%
+    arrange(desc(total)) %>%
+    head(1) %>%
+    select(year)
+}
+```
+
+We wrote this function so that we could simplify the task of finding the most popular year for a specific name. If we only wanted to perform the task once, there would be no need to write the function, since we could just write the pipeline (that makes up the body of the function). If we only wanted to perform the task a few times, then just calling the function a few times would probably be OK:
+
+```{r}
+most_popular_year(name_arg = "Larry")
+most_popular_year(name_arg = "Moe")
+most_popular_year(name_arg = "Curly")
+```
+
+### `map()`
+
+But what if we had a long list of names? We wouldn't want to have to copy and paste that code repeatedly. The solution is to create a vector that contains the names we're interested in, and then use the `map()` function to apply the function to each item in the vector. To read more about this function, type `?map` at the console.
+
+> Note: many other programming languages have a similar operation [`map()`](https://en.wikipedia.org/wiki/Map_(higher-order_function)). 
+
+For example, the people in Jordan's family have the following names:
+
+```{r}
+jordans_family <- c("Jordan", "Morganne", "Logan", "Charlie")
+```
+
+In order to call the `most_popular_year()` function on each of those names, we can write:
+
+```{r}
+map(jordans_family, most_popular_year)
+```
+
+The `map()` function will always return a `list` -- a data structure that we have not talked about much. In order to flatten the list, we need to use one of the `map_*()` functions that specifies the return data type. In this case, since `most_popular_year()` returns a `data.frame`, we use the `map_df()` function. 
+
+```{r}
+map_df(jordans_family, most_popular_year)
+```
+
+### A note on `for` loops
+
+Logically, using `map()` is very much like using a `for` loop. `for` loops are perfectly acceptable in R, but are not part of the *en vogue* R coding style. Additionally there are situations in which `for` loops are less efficient than `map()`. 
+
+If you come across a problem in R and you think you want to use a `for` loop, ask yourself if you really need to know about the **index values**. If not (which is nearly always), then you can do what you want without using a `for` loop. Instead, write a function to perform the task once, and then iterate the function over the things you want to do the function to with `map()`.
+
+## Applying a function to a grouped data frame
+
+Suppose we want to compute the top 10 most popular names. This function will do the trick:
+
+```{r}
+top10 <- function(data) {
+  data %>%
+    group_by(name) %>%
+    summarize(births = sum(n)) %>%
+    arrange(desc(births)) %>%
+    head(10)
+}
+top10(data = babynames)
+```
+
+But now suppose we want to apply this function to each *decade*. We could try to split the `babynames` table into a list of data frames -- one for each decade -- and then then use `map()` to iterate over that list. Note that the resulting data frame has a variable called `decade`, but it doesn't say the range of years. 
+
+```{r}
+top_by_decade <- babynames %>%
+  mutate(decade = 10 * floor(year / 10)) %>%
+  group_split(decade) %>%
+  map_df(top10, .id = "decade")
+```
+
+Alternatively , we can use `group_by()` to set a grouping variable, and then use `group_modify()` (a cousin of `group_map()` that returns a dataframe) to iterate over those groups. 
+
+```{r}
+# top_by_decade <- babynames %>%
+#   mutate(decade = 10 * floor(year / 10)) %>%
+#   group_by(decade) %>%
+#   group_map(~top10(.))
+
+top_by_decade <- babynames %>% 
+  mutate(decade = 10 * floor(year / 10)) %>%
+  group_by(decade) %>%
+  group_modify(~top10(.))
+```
+
+The `.` is a placeholder that indicates the data frame corresponding to each decade. Note (from `help(%>%)`):
+
+> Aha! Finally, we see how we can control where the output of the `%>%` goes! Just use the dot (`.`) as placeholder. For example, `y %>% f(x, .)` is equivalent to `f(x, y)` and `z %>% f(x, y, arg = .)` is equivalent to `f(x, y, arg = z)`. 
+
+Since `top10()` returns a `tbl_df`, the `top_by_decade` object is also a `tbl_df` that has 10 rows for each decade, all stacked on top of one another. 
+
+Let's take a look at `top_by_decade`. How many rows does it have? Make sure that you understand what this data frame contains and how it got there. 
+
+```{r}
+nrow(top_by_decade)
+```
+
+The 11th row of `top_by_decade` is:
+```
+  decade  name births
+   <dbl> <chr>  <int>
+1   1890  Mary 131630
+```
+What does this say about the name `Mary`?
+
+## Other paradigms
+
+You should be aware that `purrr` is a (relatively) new package. Many of the `map_*()` functions have rough equivalents in base R like `lapply()`, `sapply()`, `mapply()`, etc. Like other `tidyverse` tools, in my professional opinion `purrr` makes the syntax for these operations cleaner and more consistent, in a way that is conducive to learning and professional use. For more on this, see Jenny Bryan's [syntax comparison page](https://jennybc.github.io/purrr-tutorial/bk01_base-functions.html).
+
+
+# Some more practice (w/ sample solutions)
+
+As always, feel free to grab a dataset of your own and take these for a spin. If you're feeling like you want something a little more scaffolded, the following exercises use the `nycflights13` data package.
+
+```{r}
+library(nycflights13)
+```
+
+> Write a function that, for a given carrier identifier (e.g. `DL`), will retrieve the five most common airport destinations from NYC in 2013, and how often the carrier flew there.
+
+```{r}
+most_common_dest <- function(c = "DL") {
+  flights %>%
+    filter(carrier == c) %>%
+    group_by(dest) %>%
+    summarise(nflights = n()) %>%
+    top_n(5, nflights) %>%
+    arrange(nflights)
+}
+```
+
+> Use your function to find the top five destinations for Delta Airlines (`DL`).
+
+```{r}
+most_common_dest()
+```
+
+
+> Use your function to find the top five destinations for American Airlines (`AA`). How many of these destinations are shared with Delta? 
+
+```{r}
+most_common_dest("AA")
+```
+
+
+> Write a function that, for a given airport code (e.g. `BDL`), will retrieve the five most common carriers that service that airport from NYC in 2013, and what their average arrival delay time was. 
+
+```{r}
+top_carriers <- function(airport = "MCO") {
+  flights %>%
+    filter(dest == airport) %>%
+    group_by(carrier) %>%
+    summarise(nflights = n(),
+              avg_arr_delay = mean(arr_delay, na.rm = TRUE),
+              sd = sd(arr_delay, na.rm = TRUE)) %>%
+    mutate(lower.ci = avg_arr_delay - qt(1 - (0.05 / 2), nflights - 1) * sd / sqrt(nflights),
+           upper.ci = avg_arr_delay + qt(1 - (0.05 / 2), nflights - 1) * sd / sqrt(nflights)) %>%
+    mutate(ci = paste("[", lower.ci, ",", upper.ci, "]")) %>%
+    select(-sd, -lower.ci, -upper.ci) %>%
+    top_n(5, nflights)
+}
+top_carriers()
+```
+

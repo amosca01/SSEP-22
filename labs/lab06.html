@@ -1,0 +1,379 @@
+
+<div class="w3-row w3-padding-32">
+  <div class="w3-twothird w3-container w3-margin-top">
+    <h1 class="w3-text-teal">Lab 6: Functions and Iteration (<a href="lab_code/lab-functions_and_iteration.Rmd" class="w3-text-grey">.Rmd</a>)</h1>
+
+    <p>
+      In this lab, we will learn how to write and apply user-defined functions.
+    </p>
+    <pre class="r"><code>library(tidyverse)<br>library(babynames)</code></pre>
+    <p>
+      <strong>Goal</strong>: by the end of this lab, you will be able to write a function in R and execute it.
+    </p>
+
+    <h3 class="w3-text-grey">Extending a single pipeline to a function</h3>
+    <p>
+      We already know how to filter for a particular name:
+    </p>
+    <pre class="r"><code>babynames %&gt;%
+      filter(name == &quot;Logan&quot;)</code></pre>
+    <p>
+      Suppose that we want to find the year in which that name was most popular. To do this, we need a pipeline that consists of several verbs chained together.
+    </p>
+    <pre class="r"><code>babynames %&gt;%
+      filter(name == &quot;Logan&quot;) %&gt;%
+      group_by(year) %&gt;%
+      summarize(total = sum(prop)) %&gt;%
+      arrange(desc(total)) %&gt;%
+      head(1) %&gt;%
+      select(year)</code></pre>
+    <p>
+      But we might want to do this for many names, and it would be tedious to have to re-type -- or even just re-run -- the same code over and over again. An elegant solution is to write a function. For example, here we write a function called <code>most_popular_year()</code> that will return the year in which a specific name was most popular.
+    </p>
+    <pre class="r"><code>most_popular_year &lt;- function(name_arg) {
+      babynames %&gt;%
+        filter(name == name_arg) %&gt;%
+        group_by(year) %&gt;%
+        summarize(total = sum(prop)) %&gt;%
+        arrange(desc(total)) %&gt;%
+        head(1) %&gt;%
+        select(year)
+    }</code></pre>
+    <p>
+      Now we can run our function on several different names without having to re-type all of that code. Here we find the popularity of names associated with actors and actresses who won at the <a href="https://en.wikipedia.org/wiki/91st_Academy_Awards">89th Academy Awards</a>.
+    </p>
+    <pre class="r"><code>most_popular_year(&quot;Olivia&quot;)
+    most_popular_year(&quot;Regina&quot;)
+    most_popular_year(&quot;Rami&quot;)
+    most_popular_year(&quot;Mahershala&quot;)</code></pre>
+  </div>
+</div>
+
+<div class="w3-row w3-padding-0">
+  <div class="w3-twothird w3-container w3-margin-top">
+
+    <h3 class="w3-text-grey">Signatures</h3>
+    <p>
+      R doesn't have formal <a href="https://en.wikipedia.org/wiki/Type_signature">type signatures</a> for its functions the way that some other programming languages do. However, being aware of what kind of objects your functions take, and what kind of objects your function returns, is usually very important.
+    </p>
+    <p>
+      You can always show the arguments that a given function takes by using the <code>formals()</code> function.
+    </p>
+    <pre class="r"><code>formals(most_popular_year)</code></pre>
+    <p>
+      In this case, the <code>most_popular_year()</code> function takes a single argument called <code>name_arg</code>, which should be a character vector, and returns a <code>tbl_df</code>.
+    </p>
+    <p>
+      More details about functions that exist within packages are available via <code>help(name_of_function)</code>.
+    </p>
+    
+    <h4 class="w3-text-grey">Return values</h4>
+    <p>
+      By default, an R function returns the result of the last command that is executed by the function. For <code>most_popular_year()</code>, there is only one &quot;line&quot; of code (i.e., the whole pipeline), and the result of that will be a <code>tbl_df</code>.
+    </p>
+    <p>
+      Alternatively, you can use <code>return(blah)</code> to explicitly return objects. (I think) that every R function returns something (i.e., there is no such thing as a <a href="https://en.wikipedia.org/wiki/Void_type">&quot;void&quot; function</a>).
+    </p>
+    
+    <h4 class="w3-text-grey">Default argument values</h4>
+    <p>
+      If you want an argument to your function have a default value, specify it in the function definition.
+    </p>
+    <p>
+      The way that we have defined <code>most_popular_year()</code>, there is no default value for <code>name_arg</code>. Thus, if we call the function with no arguments, it will break.
+    </p>
+    <pre class="r"><code>most_popular_year()</code></pre>
+    <p>
+      In this case, this is probably the desired behavior, since it doesn't make sense to call this function without specifying a name. However, we could have defined it with a default value, say <code>&quot;Logan&quot;</code>.
+    </p>
+    <pre class="r"><code>most_popular_year_with_default &lt;- function(name_arg = &quot;Logan&quot;) {
+      babynames %&gt;%
+        filter(name == name_arg) %&gt;%
+        group_by(year) %&gt;%
+        summarize(total = sum(prop)) %&gt;%
+        arrange(desc(total)) %&gt;%
+        head(1) %&gt;%
+        select(year)
+    }</code></pre>
+    <p>
+      Now we can call the function without specifying the <code>name_arg</code> argument, but if we do so we'll always get the results for <code>&quot;Logan&quot;</code>.
+    </p>
+    <pre class="r"><code>most_popular_year_with_default()</code></pre>
+    <p>
+      We can still of course still override the default value of <code>name_arg</code>:
+    </p>
+    <pre class="r"><code>most_popular_year_with_default(name_arg = &quot;Jordan&quot;)</code></pre>
+  </div>
+</div>
+
+<div class="w3-row w3-padding-0">
+  <div class="w3-twothird w3-container w3-margin-top">
+
+    <h3 class="w3-text-grey">Scoping</h3>
+    <p>
+      How did our function know about the <code>babynames</code> table? Why wasn't that an input to the function? The answer to the first question involes the notion of <a href="http://adv-r.had.co.nz/Functions.html#lexical-scoping">variable scoping</a>, while the answer to the second question is a design choice.
+    </p>
+    <p>
+      The rules for variable scoping in R are...complicated. But what is important for you to understand is that R will look for objects in the global environment if it can't find them locally. So when we run <code>most_popular_year()</code>, R will look for a data frame called <code>babynames</code> in the global environment. If it exists, then the function should work, but if not, it won't. Thus, whether a user-defined function in R works as expected depends on what is in the global environment. This behavior is different than most compiled programming languages (e.g. C++, Java, etc.), but it is designed to make it easy to script with functions on-the-fly.
+    </p>
+    <p>
+      Note that if we unload the <code>babynames</code> package, thus removing the <code>babynames</code> table from the environment, our function no longer works.
+    </p>
+    <pre class="r"><code>detach(&quot;package:babynames&quot;, unload = TRUE)
+    # should throw an error
+    most_popular_year(&quot;Jordan&quot;)</code></pre>
+    <p>
+      Don't forget to bring <code>babynames</code> back.
+    </p>
+    <pre class="r"><code>library(babynames)</code></pre>
+    <p>
+      To be more explicit, we could pass the table that we want to search for to the function. We can achieve this by re-writing the function to take a <code>data</code> argument:
+    </p>
+    <pre class="r"><code>most_popular_year_v2 &lt;- function(data, name_arg) {
+      data %&gt;%
+        filter(name == name_arg) %&gt;%
+        group_by(year) %&gt;%
+        summarize(total = sum(prop)) %&gt;%
+        arrange(desc(total)) %&gt;%
+        head(1) %&gt;%
+        select(year)
+    }
+    # will throw error because we didn&#39;t specify &quot;data&quot;
+    most_popular_year_v2(name_arg = &quot;Logan&quot;)
+    # works
+    most_popular_year_v2(data = babynames, name_arg = &quot;Logan&quot;)</code></pre>
+    <p>
+      This also enables us to apply our function to subsets of the original data. So we can search for the most popular year for <code>Logan</code> among boys and girls separately.
+    </p>
+    <pre class="r"><code>babynames %&gt;%
+      filter(sex == &quot;F&quot;) %&gt;%
+      most_popular_year_v2(name_arg = &quot;Logan&quot;)
+
+    babynames %&gt;%
+      filter(sex == &quot;M&quot;) %&gt;%
+      most_popular_year_v2(name_arg = &quot;Logan&quot;)</code></pre>
+    <p>
+      Yay, tidy functions!
+    </p>   
+  </div>
+</div>
+
+<div class="w3-row w3-padding-0">
+  <div class="w3-twothird w3-container w3-margin-top">
+
+    <h3 class="w3-text-grey">Order of arguments</h3>
+    <p>
+      Note that the order of the arguments matters only if they are <strong>not</strong> named.
+    </p>
+    <pre class="r"><code>most_popular_year_v2(babynames, &quot;Morganne&quot;)
+    most_popular_year_v2(&quot;Morganne&quot;, babynames)
+    most_popular_year_v2(&quot;Morganne&quot;, data = babynames)</code></pre>
+    <p>
+      To be safe (and explicit), name your arguments unless you have a good reason not to.
+    </p>
+</div>
+
+<div class="w3-row w3-padding-0">
+  <div class="w3-twothird w3-container w3-margin-top">
+
+    <h3 class="w3-text-grey">Automating repetitive tasks</h3>
+    <p>
+      Part of thinking like a data scientist is recognizing when to automate a task. Computers are really good at doing things repeatedly -- but not good at knowing what to do. Your job is to tell the computer what to do!
+    </p>
+    <p>
+      We can save a lot of time by automating certain operations. In this lab we will discuss two main ways of iterating operations over a set of values.
+    </p>
+  </div>
+</div>
+
+<div class="w3-row w3-padding-0">
+  <div class="w3-twothird w3-container w3-margin-top">
+
+    <h3 class="w3-text-grey">Applying a function to a vector of values</h3>
+    <p>
+      Let's return to the <code>most_popular_year()</code> function that we defined previously. As a refresher, it looked like this:
+    </p>
+    <pre class="r"><code>most_popular_year &lt;- function(name_arg) {
+      babynames %&gt;%
+        filter(name == name_arg) %&gt;%
+        group_by(year) %&gt;%
+        summarize(total = sum(prop)) %&gt;%
+        arrange(desc(total)) %&gt;%
+        head(1) %&gt;%
+        select(year)
+    }</code></pre>
+    <p>
+      We wrote this function so that we could simplify the task of finding the most popular year for a specific name. If we only wanted to perform the task once, there would be no need to write the function, since we could just write the pipeline (that makes up the body of the function). If we only wanted to perform the task a few times, then just calling the function a few times would probably be OK:
+    </p>
+    <pre class="r"><code>most_popular_year(name_arg = &quot;Larry&quot;)
+    most_popular_year(name_arg = &quot;Moe&quot;)
+    most_popular_year(name_arg = &quot;Curly&quot;)</code></pre>
+    
+    <h4 class="w3-text-grey"><code>map()</code></h4>
+    <p>
+      But what if we had a long list of names? We wouldn't want to have to copy and paste that code repeatedly. The solution is to create a vector that contains the names we're interested in, and then use the <code>map()</code> function to apply the function to each item in the vector. To read more about this function, type <code>?map</code> at the console.
+    </p>
+    <blockquote>
+      <p>
+        Note: many other programming languages have a similar operation <a href="https://en.wikipedia.org/wiki/Map_(higher-order_function)"><code>map()</code></a>.
+      </p>
+    </blockquote>
+    <p>
+      For example, the people in Jordan's family have the following names:
+    </p>
+    <pre class="r"><code>jordans_family &lt;- c(&quot;Jordan&quot;, &quot;Morganne&quot;, &quot;Logan&quot;, &quot;Charlie&quot;)</code></pre>
+    <p>
+      In order to call the <code>most_popular_year()</code> function on each of those names, we can write:
+    </p>
+    <pre class="r"><code>map(jordans_family, most_popular_year)</code></pre>
+    <p>
+      The <code>map()</code> function will always return a <code>list</code> -- a data structure that we have not talked about much. In order to flatten the list, we need to use one of the <code>map_*()</code> functions that specifies the return data type. In this case, since <code>most_popular_year()</code> returns a <code>data.frame</code>, we use the <code>map_df()</code> function.
+    </p>
+    <pre class="r"><code>map_df(jordans_family, most_popular_year)</code></pre>
+    
+    <h4 class="w3-text-grey">A note on <code>for</code> loops</h4>
+    <p>
+      Logically, using <code>map()</code> is very much like using a <code>for</code> loop. <code>for</code> loops are perfectly acceptable in R, but are not part of the <em>en vogue</em> R coding style. Additionally there are situations in which <code>for</code> loops are less efficient than <code>map()</code>.
+    </p>
+    <p>
+      If you come across a problem in R and you think you want to use a <code>for</code> loop, ask yourself if you really need to know about the <strong>index values</strong>. If not (which is nearly always), then you can do what you want without using a <code>for</code> loop. Instead, write a function to perform the task once, and then iterate the function over the things you want to do the function to with <code>map()</code>.
+    </p>
+  </div>
+</div>
+
+<div class="w3-row w3-padding-0">
+  <div class="w3-twothird w3-container w3-margin-top">
+
+    <h3 class="w3-text-grey">Applying a function to a grouped data frame</h3>
+    <p>
+      Suppose we want to compute the top 10 most popular names. This function will do the trick:
+    </p>
+    <pre class="r"><code>top10 &lt;- function(data) {
+      data %&gt;%
+        group_by(name) %&gt;%
+        summarize(births = sum(n)) %&gt;%
+        arrange(desc(births)) %&gt;%
+        head(10)
+    }
+    top10(data = babynames)</code></pre>
+    <p>
+      But now suppose we want to apply this function to each <em>decade</em>. We could try to split the <code>babynames</code> table into a list of data frames -- one for each decade -- and then then use <code>map()</code> to iterate over that list. Note that the resulting data frame has a variable called <code>decade</code>, but it doesn't say the range of years.
+    </p>
+    <pre class="r"><code>top_by_decade &lt;- babynames %&gt;%
+      mutate(decade = 10 * floor(year / 10)) %&gt;%
+      group_split(decade) %&gt;%
+      map_df(top10, .id = &quot;decade&quot;)</code></pre>
+    <p>
+      Alternatively , we can use <code>group_by()</code> to set a grouping variable, and then use <code>group_modify()</code> (a cousin of <code>group_map()</code> that returns a dataframe) to iterate over those groups.
+    </p>
+    <pre class="r"><code># top_by_decade &lt;- babynames %&gt;%
+    #   mutate(decade = 10 * floor(year / 10)) %&gt;%
+    #   group_by(decade) %&gt;%
+    #   group_map(~top10(.))
+
+    top_by_decade &lt;- babynames %&gt;% 
+      mutate(decade = 10 * floor(year / 10)) %&gt;%
+      group_by(decade) %&gt;%
+      group_modify(~top10(.))</code></pre>
+    <p>
+      The <code>.</code> is a placeholder that indicates the data frame corresponding to each decade. Note (from <code>help(%&gt;%)</code>):
+    </p>
+    <blockquote>
+      <p>
+        Aha! Finally, we see how we can control where the output of the <code>%&gt;%</code> goes! Just use the dot (<code>.</code>) as placeholder. For example, <code>y %&gt;% f(x, .)</code> is equivalent to <code>f(x, y)</code> and <code>z %&gt;% f(x, y, arg = .)</code> is equivalent to <code>f(x, y, arg = z)</code>.
+      </p>
+    </blockquote>
+    <p>
+      Since <code>top10()</code> returns a <code>tbl_df</code>, the <code>top_by_decade</code> object is also a <code>tbl_df</code> that has 10 rows for each decade, all stacked on top of one another.
+    </p>
+    <p>
+      Let's take a look at <code>top_by_decade</code>. How many rows does it have? Make sure that you understand what this data frame contains and how it got there.
+    </p>
+    <pre class="r"><code>nrow(top_by_decade)</code></pre>
+    <p>
+      The 11th row of <code>top_by_decade</code> is:
+    </p>
+    <pre><code>  decade  name births
+       &lt;dbl&gt; &lt;chr&gt;  &lt;int&gt;
+    1   1890  Mary 131630</code></pre>
+    <p>
+      What does this say about the name <code>Mary</code>?
+    </p> 
+  </div>
+</div>
+
+<div class="w3-row w3-padding-0">
+  <div class="w3-twothird w3-container w3-margin-top">
+
+    <h3 class="w3-text-grey">Other paradigms</h3>
+    <p>
+      You should be aware that <code>purrr</code> is a (relatively) new package. Many of the <code>map_*()</code> functions have rough equivalents in base R like <code>lapply()</code>, <code>sapply()</code>, <code>mapply()</code>, etc. Like other <code>tidyverse</code> tools, in my professional opinion <code>purrr</code> makes the syntax for these operations cleaner and more consistent, in a way that is conducive to learning and professional use. For more on this, see Jenny Bryan's <a href="https://jennybc.github.io/purrr-tutorial/bk01_base-functions.html">syntax comparison page</a>.
+    </p>
+  </div>
+</div>
+
+<div class="w3-row w3-padding-0">
+  <div class="w3-twothird w3-container w3-margin-top">
+
+    <h3 class="w3-text-grey">More practice (w/ sample solutions)</h3>
+    <p>
+      As always, feel free to grab a dataset of your own and take these for a spin. If you're feeling like you want something a little more scaffolded, the following exercises use the <code>nycflights13</code> data package.
+    </p>
+    <pre class="r"><code>library(nycflights13)</code></pre>
+    <blockquote>
+      <p>
+        Write a function that, for a given carrier identifier (e.g. <code>DL</code>), will retrieve the five most common airport destinations from NYC in 2013, and how often the carrier flew there.
+      </p>
+    </blockquote>
+    <pre class="r"><code>most_common_dest &lt;- function(c = &quot;DL&quot;) {
+      flights %&gt;%
+        filter(carrier == c) %&gt;%
+        group_by(dest) %&gt;%
+        summarise(nflights = n()) %&gt;%
+        top_n(5, nflights) %&gt;%
+        arrange(nflights)
+    }</code></pre>
+    <blockquote>
+      <p>
+        Use your function to find the top five destinations for Delta Airlines (<code>DL</code>).
+      </p>
+    </blockquote>
+    <pre class="r"><code>most_common_dest()</code></pre>
+    <blockquote>
+      <p>
+        Use your function to find the top five destinations for American Airlines (<code>AA</code>). How many of these destinations are shared with Delta?
+      </p>
+    </blockquote>
+    <pre class="r"><code>most_common_dest(&quot;AA&quot;)</code></pre>
+    <blockquote>
+      <p>
+        Write a function that, for a given airport code (e.g. <code>BDL</code>), will retrieve the five most common carriers that service that airport from NYC in 2013, and what their average arrival delay time was.
+      </p>
+    </blockquote>
+    <pre class="r"><code>top_carriers &lt;- function(airport = &quot;MCO&quot;) {
+      flights %&gt;%
+        filter(dest == airport) %&gt;%
+        group_by(carrier) %&gt;%
+        summarise(nflights = n(),
+                  avg_arr_delay = mean(arr_delay, na.rm = TRUE),
+                  sd = sd(arr_delay, na.rm = TRUE)) %&gt;%
+        mutate(lower.ci = avg_arr_delay - qt(1 - (0.05 / 2), nflights - 1) * sd / sqrt(nflights),
+               upper.ci = avg_arr_delay + qt(1 - (0.05 / 2), nflights - 1) * sd / sqrt(nflights)) %&gt;%
+        mutate(ci = paste(&quot;[&quot;, lower.ci, &quot;,&quot;, upper.ci, &quot;]&quot;)) %&gt;%
+        select(-sd, -lower.ci, -upper.ci) %&gt;%
+        top_n(5, nflights)
+    }
+    top_carriers()</code></pre>
+  </div>
+</div>
+
+<div class="w3-row w3-padding-0">
+  <div class="w3-twothird w3-container w3-margin-top">
+    <p>
+      This lab was built for MassMutual DSDP by R. Jordan Crouser in June 2021, and was modified for the Smith College SSEP by Ab Mosca in June 2022.
+    </p>
+  </div>
+</div>
+
+
+

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+  <title>DS-and-Ethics</title>
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Styling -->
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-black.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  
+  <!-- Swiped from Jordan -->
+  <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+  <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+  <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+  <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<!-- Navbar -->
+  <div class="w3-top w3-container">
+    <div class="w3-bar w3-theme w3-left-align w3-large">
+      <a href="#" class="w3-bar-item w3-button w3-theme-l1" onclick="load_content('home.html')">Home</a>
+      <div class="w3-dropdown-hover">
+        <button class="w3-button">Labs</button>
+        <div class="w3-dropdown-content w3-bar-block w3-card-4">
+          <a href="#" class="w3-bar-item w3-button" onclick="load_content('labs/lab01.html')">01: Intro to R</a>
+          <a href="#" class="w3-bar-item w3-button" onclick="load_content('labs/lab02.html')">02: Data Wrangling</a>
+          <a href="#" class="w3-bar-item w3-button" onclick="load_content('labs/lab03.html')">03: Aggregation and Grouping</a>
+          <a href="#" class="w3-bar-item w3-button" onclick="load_content('labs/lab04.html')">04: Multiple Tables</a>
+          <a href="#" class="w3-bar-item w3-button" onclick="load_content('labs/lab05.html')">05: Tidy Data</a>
+          <a href="#" class="w3-bar-item w3-button" onclick="load_content('labs/lab06.html')">06: Functions and Iteration</a>
+          <a href="#" class="w3-bar-item w3-button" onclick="load_content('labs/lab07.html')">07: ggplot2</a>
+          <a href="#" class="w3-bar-item w3-button" onclick="load_content('labs/lab08.html')">08: colorbrewer</a>
+          <a href="#" class="w3-bar-item w3-button" onclick="load_content('labs/lab09.html')">09: Intro to Python</a>
+        </div>
+      </div>
+      <div class="w3-dropdown-hover">
+        <button class="w3-button">Datasets</button>
+        <div class="w3-dropdown-content w3-bar-block w3-card-4">
+          <a href="data/presapproval.csv" class="w3-bar-item w3-button">presapproval.csv</a>
+          <a href="https://www.kaggle.com/roche-data-science-coalition/uncover" class="w3-bar-item w3-button" target="_blank">UNCOVER COVID-19 Challenge</a>
+          <a href="https://www.kaggle.com/datasets/cherngs/heart-disease-cleveland-uci" class="w3-bar-item w3-button" target="_blank">UCI Heart Disease</a>
+          <a href="https://www.kaggle.com/tmdb/tmdb-movie-metadata" class="w3-bar-item w3-button" target="_blank">TMDB 5000 Movie Dataset</a>
+          <a href="https://www.kaggle.com/unsdsn/world-happiness" class="w3-bar-item w3-button" target="_blank">World Happiness Report</a>
+          <a href="data/landdata-states.csv" class="w3-bar-item w3-button">Land Prices by State</a>
+          <a href="data/arbuthnot.csv" class="w3-bar-item w3-button">Dr. Arbuthnot's Baptism Records</a>
+        </div>
+      </div>
+      <div class="w3-dropdown-hover">
+        <button class="w3-button">Resources</button>
+        <div class="w3-dropdown-content w3-bar-block w3-card-4">
+          <a href="https://ismayc.github.io/rbasics-book" class="w3-bar-item w3-button"target="_blank">R Basics (Book) by Chester Ismay</a>
+          <a href="http://adv-r.had.co.nz/Style.html" class="w3-bar-item w3-button" target="_blank">R Coding Style Guide</a>
+          <a href="https://www.rstudio.com/resources/cheatsheets/" class="w3-bar-item w3-button" target="_blank">R cheatsheets</a>
+          <a href="https://ggplot2-book.org/" class="w3-bar-item w3-button" target="_blank">ggplot2: Elegant Graphics for Data Analysis (H. Wickham)</a>
+          <a href="https://plotly-r.com/" class="w3-bar-item w3-button" target="_blank">Interactive web-based data visualization with R, plotly, and shiny (C. Sievert)</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<!-- Main content: shift it to the right by 250 pixels when the sidebar is visible -->
+  <div id="main" class="w3-main" style="margin-left:250px">
+  </div>
+<!-- END MAIN -->
+
+<!-- Footer -->
+  <footer id="myFooter">
+    <div class="w3-container w3-theme-l2 w3-padding-8 sm-font">
+      <p class="ack">Material in this course is derived from materials prepared by <a href="https://jcrouser.github.io/" target="_blank">Jordan Crouser at Smith College</a>. They were modified by Ab Mosca in 2022 for the Smith Summer Science and Engineering Program (SSEP).</p>
+    </div>
+
+    <div class="w3-container w3-theme-l1">
+      <p>Powered by <a href="https://www.w3schools.com/w3css/default.asp" target="_blank">w3.css</a></p>
+    </div>
+  </footer>
+
+  <script>
+    function load_content(page_name) {
+      let main_section = document.getElementById("main"); 
+      fetch(page_name)
+        .then(response => response.text())
+        .then(text => main_section.innerHTML = text)
+        .then(() => {
+          $('pre code').each(function(i, block) {
+            hljs.highlightBlock(block); 
+          })
+        }); 
+    }   
+
+    window.onload = load_content('home.html'); 
+  </script>
+
+</body>
+</html>

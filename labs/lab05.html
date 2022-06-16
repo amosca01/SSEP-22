@@ -1,0 +1,182 @@
+
+<div class="w3-row w3-padding-32">
+  <div class="w3-twothird w3-container w3-margin-top">
+    <h1 class="w3-text-teal">Lab 5: Tidy Data (<a href="lab_code/lab-tidy.Rmd" class="w3-text-grey">.Rmd</a>)</h1>
+
+    <p>
+      In this lab, we will learn how to convert data tables into a tidy form. We will learn about functions in the <code>tidyr</code> package, which is part of the <code>tidyverse</code> meta-package.
+    </p>
+    <pre class="r"><code>library(tidyverse)<br>library(babynames)</code></pre>
+    <p>
+      <strong>Goal</strong>: by the end of this lab, you will understand what tidy data is and how to convert a wide table into a narrow table, and vice versa.
+    </p>
+
+    <h3 class="w3-text-grey">What does <code>tidy</code> mean, and why do we care?</h3>
+    <p>
+      <strong>Tidy</strong> data are usually long and narrow. That is, it may have many rows, but relatively few columns. However, data are often stored in spreadsheets in a <strong>wide</strong> format (which may have more columns that rows) because the wide format is easier to <strong>see</strong> in a spreadsheet.
+    </p>
+    <p>
+      However, it turns out that there are lots of good reasons to keep data in a <code>tidy</code> format:
+    </p>
+    <ol>
+      <li>
+        Tools like <code>dplyr</code> and <code>ggplot2</code> expect tidy data.
+      </li>
+      <li>
+        It is basically the <a href="https://en.wikipedia.org/wiki/Third_normal_form">Third Normal Form</a>, which is the standard in relational databases (more on that later).
+      </li>
+      <li>
+        Now that we know how to wrangle and make simple visualizations, we don't need to see it all anyway.
+      </li>
+    </ol>
+  </div>
+</div>
+
+<div class="w3-row w3-padding-0">
+  <div class="w3-twothird w3-container w3-margin-top">
+
+    <h3 class="w3-text-grey"><code>tidyr</code></h3>
+    <p>
+      The <code>pivot_longer()</code> and <code>pivot_wider()</code> functions from the <code>tidyr</code> package are <strong>huge</strong> time-savers. (I don't know of any equivalent operation in Excel that can do what these functions do. Just imagine what you'd have to do in Excel? ::shudder::)
+    </p>
+    <p>
+      To recap:
+    </p>
+    <ul>
+      <li>
+        <code>pivot_longer()</code> takes a data table in a <strong>wide</strong> format and converts it into a tidy format.
+      </li>
+      <li>
+        <code>pivot_wider()</code> does the opposite (and accordingly, is used less frequently).
+      </li>
+    </ul> 
+  </div>
+</div>
+
+<div class="w3-row w3-padding-0">
+  <div class="w3-twothird w3-container w3-margin-top">
+
+    <h3 class="w3-text-grey">An example: making wide tables narrow with <code>pivot_wider()</code></h3>
+    <p>
+      We (unwittingly) came up with an example yesterday. Recall that the <code>total_births</code> data frame looks like this:
+    </p>
+    <pre class="r"><code>ssa_births &lt;- babynames %&gt;%
+      group_by(year) %&gt;%
+      summarize(num_rows = n(), births = sum(n))
+
+    total_births &lt;- births %&gt;%
+      left_join(ssa_births, by = &quot;year&quot;)
+
+    head(total_births)</code></pre>
+    <p>
+      Let's forget about <code>num_rows</code> and rename the variables.
+    </p>
+    <pre class="r"><code>total_births &lt;- total_births %&gt;%
+      select(-num_rows) %&gt;%
+      rename(census = births.x, ssa = births.y)</code></pre>
+    <p>
+      Each row corresponds to a single <code>year</code>, and for each year, we have two variables: <code>census</code> (from the Census) and <code>ssa</code> (from the SSA). This data frame is <strong>not</strong> tidy. (Why?)
+    </p>
+    <p>
+      This data frame has 109 rows and 3 columns:
+    </p>
+    <pre class="r"><code>dim(total_births)</code></pre>
+    <p>
+      ...but what we want is a data frame that has 218 rows and three columns: <code>year</code>, <code>source</code>, and <code>births</code>. This data frame would be tidy, because like is stored with like. The <code>pivot_longer()</code> function will help us get there.
+    </p>
+    <pre class="r"><code>births_tidy &lt;- total_births %&gt;%
+      pivot_longer(cols = c(ssa, census), 
+                   names_to = &quot;source&quot;, 
+                   values_to = &quot;births&quot;) %&gt;%
+      arrange(year)
+
+    head(births_tidy)
+
+    dim(births_tidy)</code></pre>
+    <p>
+      See what happened? View <code>births_tidy</code> in several different ways if necessary, and make sure that you understand where each piece of data went.
+    </p>
+    <p>
+      Foreshadowing what we'll learn about data visualization in a couple of weeks, we can now map <code>year</code> to the x axis, <code>births</code>= to the y axis, and use color to encode the <code>source</code>:
+    </p>
+    <pre class="r"><code>ggplot(data = births_tidy, aes(x = year, y = births, color = source)) +
+      geom_line() </code></pre>
+    <p>
+      Note that even though we have two sources for birth numbers, the numbers themselves represent the same kind of thing.
+    </p>
+
+    <h4 class="w3-text-grey">Now, with a little less hand-holding...</h4>
+    <p>
+      Try this process out for yourself with a <a href="http://www.gapminder.org/data/">Gapminder dataset</a>. We'll walk you through it step-by-step using the &quot;Prevalence of HIV, total (% of population ages 15-49)&quot; table, but feel free to choose any table that's interesting to you.
+    </p>
+    <h5 class="w3-text-grey">Step 1:</h5>
+    <blockquote>
+      <p>
+        Pick a dataset and download it as a CSV file.
+      </p>
+    </blockquote>
+
+    <h5 class="w3-text-grey">Step 2:</h5>
+    <blockquote>
+      <p>
+        Read the CSV into R using <code>read_csv()</code>. Pay careful attention to the path names! Your code will look something like this:
+      </p>
+    </blockquote>
+    <pre class="r"><code>hiv &lt;- read_csv(&quot;~/Downloads/sh_dyn_aids_zs.csv&quot;)</code></pre>
+    
+    <h5 class="w3-text-grey">Step 3:</h5>
+    <blockquote>
+      <p>
+        Get to know your data. Look at the first few rows. Use <code>dim()</code> to find the dimensions of your data frame. Make a note of these.
+      </p>
+    </blockquote>
+    <pre class="r"><code>head(hiv)
+    dim(hiv)</code></pre>
+    
+    <h5 class="w3-text-grey">Step 4:</h5>
+    <blockquote>
+      <p>
+        Take out a piece of paper and draw what you want your &quot;tidy&quot; data frame to look like. It should have three columns: <code>country</code>, <code>year</code>, and <code>value</code>. How many rows will it have?
+      </p>
+    </blockquote>
+    
+    <h5 class="w3-text-grey">Step 5:</h5>
+    <blockquote>
+      <p>
+        Use <code>pivot_longer()</code> and/or <code>pivot_wider()</code> to convert your data into a tidy format. Check that it has the right dimensions.
+      </p>
+    </blockquote>
+    <pre class="r"><code>hiv &lt;- hiv %&gt;%
+      pivot_longer(-country, 
+                   names_to = &quot;year&quot;, 
+                   values_to = &quot;est_prevalence&quot;) %&gt;%
+      mutate(year = sub(&quot;X&quot;, &quot;&quot;, year))</code></pre>
+    
+    <h5 class="w3-text-grey">Step 6:</h5>
+    <blockquote>
+      <p>
+        Say something interesting! Here's one example:
+      </p>
+    </blockquote>
+    <pre class="r"><code>hiv %&gt;%
+      ggplot(aes(x = as.numeric(year), 
+                 y = est_prevalence, 
+                 group = country,
+                 color = est_prevalence)) +
+      geom_line() +
+      xlim(c(1990, 2011))</code></pre>
+  </div>
+</div>
+
+<div class="w3-row w3-padding-0">
+  <div class="w3-twothird w3-container w3-margin-top">
+    <p>
+      This lab was built for MassMutual DSDP by R. Jordan Crouser in June 2021, and was modified for the Smith College SSEP by Ab Mosca in June 2022.
+    </p>
+  </div>
+</div>
+
+
+
+
+

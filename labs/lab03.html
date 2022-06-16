@@ -1,0 +1,165 @@
+
+<div class="w3-row w3-padding-32">
+  <div class="w3-twothird w3-container w3-margin-top">
+    <h1 class="w3-text-teal">Lab 3: Aggregation and Grouping (<a href="lab_code/lab-group_by.Rmd" class="w3-text-grey">.Rmd</a>)</h1>
+
+    <p>
+      In this lab, we will continue to develop our data transformation skills by learning how to use the <code>group_by()</code> function in conjunction with the <code>summarize()</code> verb that we dabbled with previously.
+    </p>
+    <pre class="r"><code>library(tidyverse)<br>library(babynames)</code></pre>
+    <p>
+      <strong>Goal</strong>: by the end of this lab, you will be able to use <code>group_by()</code> to perform summary operations on groups.
+    </p>
+
+    <h3 class="w3-text-grey">Summarization with <code>group_by()</code></h3>
+
+    <p>
+      Let's revisit the <code>babynames</code> dataset from yesterday's <a href="lab-single_table.html">Single Table Anaylsis Lab</a>. Recall that I asked you to choose a name, and then to think about how you would go about answering the following question:
+    </p>
+    <blockquote>
+      <p>
+        In which year was that name given to M and F babies most equally (i.e. <strong>closest to a 50/50 split</strong>)?
+      </p>
+    </blockquote>
+    <p>
+      You could, of course, scan the data visually to estimate the percentages in each year:
+    </p>
+    <pre class="r"><code>babynames %&gt;%
+      filter(name == &quot;Jordan&quot;)</code></pre>
+    <p>
+      But this is pretty inefficient and does not provide an exact solution.
+    </p>
+    <p>
+      The key to solving this problem is to recognize that we need to collapse the <strong>two</strong> rows corresponding to each assigned sex in each year into a single row that contains the information for both sexes (i.e. <code>summarize()</code>). Unfortunately, there is no way for R to know what to compute its own---we have to tell it.
+    </p>
+    <p>
+      The <code>group_by()</code> function specifies a variable on which the data frame will be collapsed. Each row in the result set will correspond to one unique value of that variable. In this case, we want to group by <code>year</code>. [This is sometimes called <strong>&quot;rolling up&quot;</strong> a data set.]
+    </p>
+    <pre class="r"><code>babynames %&gt;%
+      filter(name == &quot;Jordan&quot;) %&gt;%
+      group_by(year)</code></pre>
+    <p>
+      This doesn't seem to do much at first glance, because we haven't asked R to compute anything: we've just asked it to reorganize the data into groups based on the variable <code>year</code>. But that's about to change!
+    </p> 
+  </div>
+</div>
+
+<div class="w3-row w3-padding-0">
+  <div class="w3-twothird w3-container w3-margin-top">
+
+    <h3 class="w3-text-grey">A better way: aggregation</h3>
+    <p>
+      Remember that <code>summarize()</code> takes a list of definitions for columns you want to see in the result set. The key to understanding <code>summarize()</code> is to note that it operates on vectors (which may contain many values), but each variable defined within <code>summarize()</code> <strong>must return a single value</strong> (per group). [Why?]
+    </p>
+    <p>
+      Thus, the variables defined by the arguments to <code>summarize()</code> usually involve <em>aggregate</em> functions like <code>sum()</code>, <code>mean()</code>, <code>length()</code>, <code>max()</code>, <code>n()</code>, etc. In this case, we can use the conditional <code>ifelse()</code> statement around a <code>sum()</code> to extract the number of <code>F</code> babies born in each year [this will be our numberator], and another one to extract the total number of <code>M</code> babies bown in that same year [this will be our denominator]:
+    </p>
+    <pre class="r"><code>babynames %&gt;%
+      filter(name == &quot;Jordan&quot;) %&gt;%
+      group_by(year) %&gt;%
+      summarize(N = n(), 
+                ratio = sum(ifelse(sex == &quot;F&quot;, n, 0)) / 
+                        sum(ifelse(sex == &quot;M&quot;, n, 0)))</code></pre>
+    <p>
+      Now all that's left is to look for the year with a <code>ratio</code> that's closest to 0.5. Since we don't care whether the closest value is over or under, we can just subtract that <code>ratio</code> from 1 and take the absolute value. Then all we have to do is <code>arrange()</code> by the resulting value:
+    </p>
+    <pre class="r"><code>babynames %&gt;%
+      filter(name == &quot;Jordan&quot;) %&gt;%
+      group_by(year) %&gt;%
+      summarize(N = n(), 
+                ratio = sum(ifelse(sex == &quot;F&quot;, n, 0)) / 
+                        sum(ifelse(sex == &quot;M&quot;, n, 0)),
+                howfaroff = abs(1 - ratio)) %&gt;%
+      filter(N == 2)  %&gt;%
+      arrange(howfaroff)</code></pre>
+    <p>
+      Let's take these functions out for a spin by answering a couple of questions!
+    </p>
+    
+    <h4 class="w3-text-grey">1. Bumper crop</h4>
+    <p>
+      Which year had the greatest number of births?
+    </p>
+    <pre class="r"><code>babynames %&gt;%
+      group_by(year) %&gt;%
+      summarize(num_births = sum(n)) %&gt;%
+      arrange(desc(num_births)) </code></pre>
+    
+    <h4 class="w3-text-grey">2. &quot;In fashion&quot;</h4>
+    <p>
+      What are the earliest and latest year that each name appears?
+    </p>
+    <pre class="r"><code>babynames %&gt;%
+      group_by(name) %&gt;%
+      summarize(earliest = min(year), latest = max(year))</code></pre>
+    
+    <h4 class="w3-text-grey">3. Persistence</h4>
+    <p>
+      Find all names that have two entries for each of the 138 years.
+    </p>
+    <pre class="r"><code>babynames %&gt;%
+      group_by(name) %&gt;%
+      summarize(num_appearances = n()) %&gt;%
+      filter(num_appearances == 276)</code></pre>
+
+    <h4 class="w3-text-grey">4. Popular names</h4>
+    <p>
+      Among popular names (let's say at least 1% of the births in a given year), which name is the <em>youngest</em>---meaning that its first appearance as a popular name is the most recent?
+    </p>
+    <pre class="r"><code>babynames %&gt;%
+      mutate(is_popular = prop &gt;= 0.01) %&gt;%
+      filter(is_popular == TRUE) %&gt;%
+      group_by(name) %&gt;%
+      summarize(earliest = min(year)) %&gt;%
+      arrange(desc(earliest))</code></pre>
+    <p>
+      Now let's find the most popular names of the 1990s.
+    </p>
+    <pre class="r"><code>babynames %&gt;%
+      filter(year &gt;= 1990 &amp; year &lt; 2000) %&gt;%
+      group_by(name) %&gt;%
+      summarize(num_births = sum(n)) %&gt;%
+      arrange(desc(num_births))</code></pre> 
+  </div>
+</div>
+
+<div class="w3-row w3-padding-0">
+  <div class="w3-twothird w3-container w3-margin-top">
+
+    <h3 class="w3-text-grey">Your turn!</h3>
+
+    <p>
+      Now let's try these new verbs out on your own dataset. Don't have one? Try answering these questions using the <code>nycflights13</code> package.
+    </p>
+    <blockquote>
+      <ol>
+        <li>
+          What was the daily average number of flights leaving each of the three NYC airports in 2013?
+        </li>
+        <li>
+          For each carrier, compute the number of total flights, the average departure delay, the number of unique destinations serviced, and the number of unique planes used.
+        </li>
+        <li>
+          Plot the distribution of average daily delay time across the entire year for each of the three airports.
+        </li>
+        <li>
+          <strong>Challenge</strong>: Plot the average arrival delay time as a function of the distance flown <em>to the nearest 100 miles</em> for each of the three airports.
+        </li>
+      </ol>
+    </blockquote>
+  </div>
+</div>
+
+<div class="w3-row w3-padding-0">
+  <div class="w3-twothird w3-container w3-margin-top">
+
+    <p>
+      This lab was built for MassMutual DSDP by R. Jordan Crouser in June 2021, and was modified for the Smith College SSEP by Ab Mosca in June 2022.
+    </p>
+  </div>
+</div>
+
+
+
+
+

@@ -1,0 +1,571 @@
+
+<div class="w3-row w3-padding-32">
+  <div class="w3-twothird w3-container w3-margin-top">
+    <h1 class="w3-text-teal">Lab 7: ggplot2 (<a href="lab_code/lab-ggplot2.Rmd" class="w3-text-grey">.Rmd</a>)</h1>
+
+    <p>
+      <strong>Goal</strong>: by the end of this lab, you will be able to use <code>ggplot2</code> to build several different data-driven graphics.
+    </p>
+
+    <h3 class="w3-text-grey">Setting up</h3>
+    <p>
+      <strong>Remember</strong>: before we can use a library like <code>ggplot2</code>, we have to load it. In this case, we load the <code>tidyerse</code> package, which automatically loads <code>ggplot2</code> for us.
+    </p>
+    <pre class="r"><code>library(tidyverse)</code></pre>
+  </div>
+</div>
+
+<div class="w3-row w3-padding-0">
+  <div class="w3-twothird w3-container w3-margin-top">
+
+    <h3 class="w3-text-grey">Why <code>ggplot2</code>?</h3>
+    <p>
+      Advantages of <code>ggplot2</code>
+    </p>
+    <ul>
+      <li>
+        consistent underlying <strong>grammar of graphics</strong> (Wilkinson, 2005)
+      </li>
+      <li>
+        plot specification at a high level of abstraction
+      </li>
+      <li>
+        very flexible
+      </li>
+      <li>
+        <code>theme</code> system for polishing plot appearance (more on this later)
+      </li>
+      <li>
+        mature and complete graphics system
+      </li>
+      <li>
+        many users, active mailing list
+      </li>
+    </ul>
+  </div>
+</div>
+
+<div class="w3-row w3-padding-0">
+  <div class="w3-twothird w3-container w3-margin-top">
+
+    <h3 class="w3-text-grey">What Is <em>The Grammar Of Graphics</em>?</h3>
+    <p>
+      <strong>The big idea</strong>: independently specify plot building blocks and combine them to create just about any kind of graphical display you want. Building blocks of a graph include:
+    </p>
+    <ul>
+      <li>
+        data
+      </li>
+      <li>
+        aesthetic mappings
+      </li>
+      <li>
+        geometric objects
+      </li>
+      <li>
+        statistical transformations
+      </li>
+      <li>
+        scales
+      </li>
+      <li>
+        coordinate systems
+      </li>
+      <li>
+        position adjustments
+      </li>
+      <li>
+        faceting
+      </li>
+    </ul>
+    <p>
+      Using <code>ggplot2</code>, we can specify different parts of the plot, and combine them together using the <code>+</code> operator. [Note that the <code>+</code> operator is similar to the <code>%&gt;%</code> pipe operator but is <strong>not</strong> interchangeable!]
+    </p>
+  </div>
+</div>
+
+<div class="w3-row w3-padding-0">
+  <div class="w3-twothird w3-container w3-margin-top">
+
+    <h3 class="w3-text-grey">Example: <code>Housing prices</code></h3>
+    <p>
+      Let’s start by taking a look at some data on housing prices:
+    </p>
+    <pre class="r"><code>housing <- read.csv(&quot;filepath/landdata-states.csv&quot;)<br>glimpse(housing)</code></pre>
+    <p>
+      <img src="img/housing-glimpse.png" width="100%">
+    </p>
+    <p>
+      (Data from <a href="https://www.lincolninst.edu/subcenters/land-values/land-prices-by-state.asp" class="uri">https://www.lincolninst.edu/subcenters/land-values/land-prices-by-state.asp</a>)
+    </p>
+  </div>
+</div>
+
+<div class="w3-row w3-padding-0">
+  <div class="w3-twothird w3-container w3-margin-top">
+
+    <h3 class="w3-text-grey">Geometric Objects and Aesthetics</h3>
+    
+    <h4 class="w3-text-grey">Geometric Objects (<code>geom</code>)</h4>
+    <p>
+      Geometric objects or <code>geoms</code> are the actual marks we put on a plot. Examples include:
+    </p>
+    <ul>
+      <li>
+        points (<code>geom_point</code>, for scatter plots, dot plots, etc)
+      </li>
+      <li>
+        lines (<code>geom_line</code>, for time series, trend lines, etc)
+      </li>
+      <li>
+        boxplot (<code>geom_boxplot</code>, for, well, boxplots!)
+      </li>
+      <li>
+        … and many more!
+      </li>
+    </ul>
+    <p>
+      A plot should have at least one <code>geom</code>, but there is no upper limit. You can add a <code>geom</code> to a plot using the <code>+</code> operator.
+    </p>
+    <p>
+      You can get a list of available geometric objects using the code below:
+    </p>
+    <pre class="r"><code>help.search("geom_", package = "ggplot2")</code></pre>
+    <p>
+      or simply type <code>geom_&lt;tab&gt;</code> in RStudio to see a list of functions starting with <code>geom_</code>.
+    </p>
+    
+    <h4 class="w3-text-grey">Aesthetic Mapping (<code>aes</code>)</h4>
+    <p>
+      In <code>ggplot2</code>, <em>aesthetic</em> means “something you can see”. Each aesthetic is a mapping between a visual cue and a variable. Examples include:
+    </p>
+    <ul>
+      <li>
+        position (i.e., on the x and y axes)
+      </li>
+      <li>
+        color (“outside” color)
+      </li>
+      <li>
+        fill (“inside” color)
+      </li>
+      <li>
+        shape (of points)
+      </li>
+      <li>
+        line type
+      </li>
+      <li>
+        size
+      </li>
+    </ul>
+    <p>
+      Each type of <code>geom</code> accepts only a subset of all aesthetics—refer to the <code>geom</code> help pages to see what mappings each <code>geom</code> accepts. Aesthetic mappings are set with the <code>aes()</code> function.
+    </p>
+    
+    <h4 class="w3-text-grey">Points</h4>
+    <p>
+      Now that we know about geometric objects and aesthetic mapping, we’re ready to make our first <code>ggplot</code>: a scatterplot. We’ll use <code>geom_point</code> to do this, which requires <code>aes</code> mappings for <code>x</code> and <code>y</code>; all others are optional.
+    </p>
+    <pre class="r"><code>hp2013Q1 <- housing %>%
+      filter(Date == 2013.25
+
+    ggplot(hp2013Q1, aes(y = Structure.Cost, x = Land.Value)) + 
+      geom_point()</code></pre>
+    <p>
+      <img src="img/scatterplot-example-1.png" width="100%" />
+    </p>
+    <blockquote>
+      <p>
+        Create a scatterplot of the value of each home in the first quarter of 2013 as a function of the value of the land.
+      </p>
+    </blockquote>
+    <pre class="r"><code># sample solution
+    ggplot(hp2013Q1, aes(y = Home.Value, x = Land.Value)) + 
+      geom_point()</code></pre>
+    
+    <h4 class="w3-text-grey">Plot objects</h4>
+    <p>
+      The output of the <code>ggplot()</code> function is an object. Since we want to modify the plot that we created above, it’s helpful to store the plot as an object.
+    </p>
+    <pre class="r"><code>base_plot <- ggplot(hp2013Q1, 
+        aes(y = Structure.Cost, x = Land.Value))</code></pre>
+    <p>
+      To actually show the plot, we just print it. Note that this plot doesn’t show anything because we haven’t added any <code>geom</code>s yet! Still, the aesthetic mapping are defined, and any subsequent <code>geom</code>s that we add will use those mappings.
+    </p>
+    <pre class="r"><code>base_plot +
+      geom_point()</code></pre>
+    <blockquote>
+      <p>
+        Store the scatterplot that you created in the previous exercise as an object called <code>home_value_plot</code>.
+      </p>
+    </blockquote>
+    <pre class="r"><code># sample solution
+      home_value_plot <- ggplot(hp2013Q1,
+      aes(y = Home.Value, x = Land.Value)) + 
+    geom_point()</code></pre>
+
+    <h4 class="w3-text-grey">Lines</h4>
+    <p>
+      A plot constructed with <code>ggplot</code> can have more than one <code>geom</code>. In that case, the mappings established in the <code>ggplot()</code> call are plot defaults that can be added to or overridden. For example, we could connect all of the points using <code>geom_line()</code>. Note that now we see both points <strong>and</strong> lines!
+    </p>
+     <pre class="r"><code>base_plot + 
+      geom_point() + 
+      geom_line()</code></pre>
+    <p>
+      <img src="img/geom_line-1.png" width="100%"/>
+    </p>
+    <blockquote>
+      <p>
+        Does it makes sense to connect the observations with <code>geom_line()</code> in this case? Do the lines help us understand the connections between the observations better? What do the lines represent?
+      </p>
+    </blockquote>
+
+    <h4 class="w3-text-grey">Smoothers</h4>
+    <p>
+      Not all geometric objects are simple shapes—<code>geom_smooth()</code> includes both a line and a ribbon.
+    </p>
+     <pre class="r"><code>base_plot + 
+      geom_point() + 
+      geom_smooth()</code></pre>
+    <p>
+      <img src="img/smoother-example-1.png" width="100%"/>
+    </p>
+    
+    <h4 class="w3-text-grey">Text</h3>
+    <p>
+      Each <code>geom</code> accepts a particular set of aesthetics (i.e., mappings)—for example <code>geom_text()</code> accepts a <code>labels</code> mapping.
+    </p>
+    <pre class="r"><code>base_plot + 
+      geom_text(aes(label = State), size = 3)</code></pre>
+    <p>
+      <img src="img/text-sample-1.png" width="100%"/>
+    </p>
+    
+    <h4 class="w3-text-grey">Aesthetic Mapping vs. Assignment</h4>
+    <p>
+      Note that variables are mapped to aesthetics with the <code>aes()</code> function, while fixed visual cues are set outside the <code>aes()</code> call. This sometimes leads to confusion, as in this example:
+    </p>
+    <pre class="r"><code>base_plot + 
+      geom_point(aes(size = 2), # not what you want because 2 is not a variable
+                color = "red") # this is fine -- turns all points red</code></pre>
+    <p>
+      <img src="img/right-vs-wrong-aes-1.png" width="100%"/>
+    </p>
+    <p>
+      The <code>aes()</code> function can also be used outside of a call to a <code>geom</code>. Here, we update the <code>base_plot</code> to map color to home value.
+    </p>
+    <pre class="r"><code>base_plot <- base_plot +
+      aes(color = Home.Value)</code></pre>
+    <blockquote>
+      <p>
+        In your <code>home_value_plot</code>, map color to the cost of the structure and show your scatterplot.
+      </p>
+    </blockquote>
+    <pre class="r"><code># sample solution
+      home_value_plot + 
+      aes(color = Structure.Cost) + 
+      geom_point()</code></pre>
+
+    <h4 class="w3-text-grey">Mapping Variables to Other Aesthetics</h4>
+    <p>
+      Other aesthetics are mapped in the same way as <code>x</code> and <code>y</code> in the previous example.
+    </p>
+     <pre class="r"><code>base_plot + 
+      geom_point(aes(shape = region))</code></pre>
+    <pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
+    <p>
+      <img src="img/other-aes-example-1.png" width="100%"/>
+    </p>
+  </div>
+</div>
+
+<div class="w3-row w3-padding-0">
+  <div class="w3-twothird w3-container w3-margin-top">
+
+    <h3 class="w3-text-grey">Scales: Controlling Aesthetic Mapping</h3>
+    <p>
+      Aesthetic mapping (i.e., with <code>aes()</code>) only says that a variable should be mapped to an aesthetic. It doesn’t say <em>how</em> that should happen. For example, when mapping a variable to <em>shape</em> with <code>aes(shape = z)</code> you don’t say <em>what</em> shapes should be used. Similarly, <code>aes(color = z</code> doesn’t say <em>what</em> colors should be used. Describing what colors/shapes/sizes etc. to use is done by modifying the corresponding <em>scale</em>. In <code>ggplot2</code>, <code>scales</code> include:
+    </p>
+    <ul>
+      <li>
+        <code>position</code>
+      </li>
+      <li>
+        <code>color</code>, <code>fill</code>, and <code>alpha</code>
+      </li>
+      <li>
+        <code>size</code>
+      </li>
+      <li>
+        <code>shape</code>
+      </li>
+      <li>
+        <code>linetype</code>
+      </li>
+    </ul>
+    <p>
+      Scales are modified with a series of functions using a <code>scale_&lt;aesthetic&gt;_&lt;type&gt;</code> naming scheme. Try typing <code>scale_&lt;tab&gt;</code> to see a list of scale modification functions.
+    </p>
+
+    <h4 class="w3-text-grey">Common Scale Arguments</h4>
+    <p>
+      The following arguments are common to most <code>scales</code> in <code>ggplot2</code>:
+    </p>
+    <ul>
+      <li>
+        <code>name</code>: the first argument specifies the axis or legend title
+      </li>
+      <li>
+        <code>limits</code>: the minimum and maximum of the <code>scale</code>
+      </li>
+      <li>
+        <code>breaks</code>: the points along the scale where labels should appear
+      </li>
+      <li>
+        <code>labels</code>: the text that appear at each break
+      </li>
+    </ul>
+    <p>
+      Specific scale functions may have additional arguments; for example, the <code>scale_color_continuous()</code> function has arguments <code>low</code> and <code>high</code> for setting the colors at the low and high end of the scale.
+    </p>
+    
+    <h4 class="w3-text-grey">Scale Modification Examples</h4>
+    <p>
+      Start by constructing a dotplot showing the distribution of home values by <code>Date</code> and <code>State</code>.
+    </p>
+    <pre class="r"><code>home_plot <- ggplot(housing, aes(y = State, x = Home.Price.Index)) + 
+      geom_point(aes(color = Date), 
+        alpha = 0.3,
+        size = 1.5, 
+        position = position_jitter(width = 0, height = 0.25))</code></pre>
+    <p>
+      First, we will change the label on the vertical axis.
+    </p>
+    <pre class="r"><code>home_plot <- home_plot + 
+      scale_y_discrete(name = "State Abbreviation")</code></pre>
+    <p>
+      <img src="img/changing-scale-example-1.png" width="100%"/>
+    </p>
+    <p>
+      Now let’s modify the <code>breaks</code> and <code>labels</code> for the <code>x</code> axis and color scales:
+    </p>
+    <pre class="r"><code>home_plot + 
+      scale_color_continuous(breaks = c(1975.25, 1994.25, 2013.25),
+        labels = c(1971, 1994, 2013))</code></pre>
+    <p>
+      <img src="img/changing-scale-example-1.png" width="100%"/>
+    </p>
+    <p>
+      Next change the low and high values to <code>blue</code> and <code>red</code>:
+    </p>
+    <pre class="r"><code>home_plot <- home_plot + 
+      scale_color_continuous(breaks = c(1975.25, 1994.25, 2013.25),
+        labels = c(1971, 1994, 2013),
+        low = "blue", high = "red")
+      home_plot</code></pre>
+    <p>
+      <img src="img/changing-color-example-1.png" width="100%"/>
+    </p>
+
+    <h4 class="w3-text-grey">Using different color scales</h4>
+    <p>
+      <code>ggplot2</code> has a wide variety of color <code>scales</code>; here is an example using <code>scale_color_gradient2</code> to interpolate between three different colors:
+    </p>
+    <pre class="r"><code>home_plot + 
+      scale_color_gradient2(breks = c(1975.25, 1994.25, 2013.25),
+        labels = c(1971, 1994, 2013),
+        low = "blue",
+        high = "red",
+        mid = "gray60", 
+        midpoint = 1994.25)</code></pre>
+    <p>
+      <img src="img/color-scale-midpoint-example-1.png" width="100%"/>
+    </p>
+    <blockquote>
+      <p>
+        Since a home price index of 1 is an important benchmark, it is worth highlighting as contextual reference in our plot. Use <code>geom_vline()</code> to add a dotted, black, vertical line to the plot we created above.
+      </p>
+    </blockquote>
+    <pre class="r"><code># sample solution
+    home_plot + 
+      geom_vline(aes(xintercept = 1), linetype = 3, color = "black") + 
+      scale_color_gradient2(breaks = c(1975.25, 1994.25, 2013.25),
+                        labels = c(1971, 1994, 2013),
+                        low = "blue",
+                        high = "red",
+                        mid = "gray60",
+                        midpoint = 1994.25)</code></pre>
+    <blockquote>
+      <p>
+        Recall that layers in <code>ggplot2</code> are added sequentially. How would you put the dotted vertical line you created in the previous exercise <em>behind</em> the data values?
+      </p>
+    </blockquote>
+    
+    <h4 class="w3-text-grey">Available Scales</h4>
+    <p>
+      Here’s a (partial) combination matrix of available scales:
+    </p>
+    <table>
+      <thead>
+        <tr class="header">
+          <th><strong>Scale</strong></th>
+          <th><strong>Types</strong></th>
+          <th><strong>Examples</strong></th>
+        </tr>
+      </thead>
+    <tbody>
+      <tr class="odd">
+        <td><code>scale_color_</code></td>
+        <td><code>identity</code></td>
+        <td><code>scale_fill_continuous</code></td>
+      </tr>
+      <tr class="even">
+        <td><code>scale_fill_</code></td>
+        <td><code>manual</code></td>
+        <td><code>scale_color_discrete</code></td>
+      </tr>
+      <tr class="odd">
+        <td><code>scale_size_</code></td>
+        <td><code>continuous</code></td>
+        <td><code>scale_size_manual</code></td>
+      </tr>
+      <tr class="even">
+        <td></td>
+        <td><code>discrete</code></td>
+        <td><code>scale_size_discrete</code></td>
+      </tr>
+      <tr class="odd">
+        <td><code>scale_shape_</code></td>
+        <td><code>discrete</code></td>
+        <td><code>scale_shape_discrete</code></td>
+      </tr>
+      <tr class="even">
+        <td><code>scale_linetype_</code></td>
+        <td><code>identity</code></td>
+        <td><code>scale_shape_manual</code></td>
+      </tr>
+      <tr class="odd">
+        <td></td>
+        <td><code>manual</code></td>
+        <td><code>scale_linetype_discrete</code></td>
+      </tr>
+      <tr class="even">
+        <td><code>scale_x_</code></td>
+        <td><code>continuous</code></td>
+        <td><code>scale_x_continuous</code></td>
+      </tr>
+      <tr class="odd">
+        <td><code>scale_y_</code></td>
+        <td><code>discrete</code></td>
+        <td><code>scale_y_discrete</code></td>
+      </tr>
+      <tr class="even">
+        <td></td>
+        <td><code>reverse</code></td>
+        <td><code>scale_x_log</code></td>
+      </tr>
+      <tr class="odd">
+        <td></td>
+        <td><code>log</code></td>
+        <td><code>scale_y_reverse</code></td>
+      </tr>
+      <tr class="even">
+        <td></td>
+        <td><code>date</code></td>
+        <td><code>scale_x_date</code></td>
+      </tr>
+      <tr class="odd">
+        <td></td>
+        <td><code>datetime</code></td>
+        <td><code>scale_y_datetime</code></td>
+      </tr>
+      </tbody>
+    </table>
+    <p>
+      <strong>Note</strong>: in RStudio, you can type <code>scale_</code> followed by TAB to get the whole list of available scales.
+    </p> 
+  </div>
+</div>
+
+<div class="w3-row w3-padding-0">
+  <div class="w3-twothird w3-container w3-margin-top">
+
+    <h3 class="w3-text-grey">Faceting</h3>
+    <ul>
+      <li>
+        Faceting is <code>ggplot2</code> parlance for <strong>small multiples</strong>
+      </li>
+      <li>
+        The idea is to create separate graphs for subsets of data
+      </li>
+      <li>
+        <code>ggplot2</code> offers two functions for creating small multiples:
+        <ul>
+          <li>
+            <code>facet_wrap()</code>: define subsets as the levels of a single grouping variable
+          </li>
+          <li>
+            <code>facet_grid()</code>: define subsets as the crossing of two grouping variables
+          </li>
+        </ul>
+      </li>
+      <li>
+        Facilitates comparison among plots, not just of <code>geoms</code> within a plot
+      </li>
+    </ul>
+    
+    <h4 class="w3-text-grey">Example: what is the trend in housing prices in each state?</h4>
+    <p>
+      Let’s start by using a technique we already know: map <code>State</code> to <code>color</code>:
+    </p>
+    <pre class="r"><code>state_plot <- ggplot(housing, aes(x = Date, y = Home.Value))
+
+    state_plot + 
+      geom_line(aes(color = State))</code></pre>
+    <p>
+      <img src="img/line-plot-example-1.png" width="100%"/>
+    </p>
+    <p>
+      There are two problems here: there are too many states to distinguish each one by <code>color</code>, and the lines obscure one another.
+    </p>
+  
+    <h4 class="w3-text-grey">Faceting to the rescue!</h4>
+    <p>
+      We can fix the previous plot by faceting by <code>State</code> rather than mapping <code>State</code> to <code>color</code>:
+    </p>
+    <pre class="r"><code>state_plot + 
+      geom_line() +
+      facet_wrap(~State, ncol = 10)</code></pre>
+    <p>
+      <img src="img/faceting-example-1.png" width="100%"/>
+    </p>
+    <p>
+      There is also a <code>facet_grid()</code> function for faceting in two dimensions.
+    </p>
+    <blockquote>
+      <p>
+        Use a <code>facet_wrap</code> to create a data graphic of your choice that illustrates something interesting about home prices.
+      </p>
+    </blockquote>
+    <pre class="r"><code># sample solution
+    ggplot(housing, aes(x = Date, y = Home.Price.Index, color = State)) + 
+      geom_hline(aes(yintercept = 1), linetype = 3, color = "black") + 
+      geom_point(alpha = 0.1) +
+      geom_line() + 
+      facet_wrap(~region)</code></pre>
+  </div>
+</div>
+
+<div class="w3-row w3-padding-0">
+  <div class="w3-twothird w3-container w3-margin-top">
+    <p>
+      This lab is based on the “Introduction to R Graphics with ggplot2” workshop, which is a product of the Data Science Services team Harvard University. The original source is released under a Creative Commons Attribution-ShareAlike 4.0 Unported. This lab was adapted for SDS192: and Introduction to Data Science in Spring 2017 by R. Jordan Crouser at Smith College, and was modified for the Smith College SSEP by Ab Mosca in June 2022.
+    </p>
+  </div>
+</div>
+
+
+
+
+
