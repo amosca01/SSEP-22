@@ -1,0 +1,196 @@
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+In this lab, we will learn how to join two tables together. 
+
+```{r, message=FALSE}
+library(tidyverse)
+library(babynames)
+```
+
+**Goal**: by the end of this lab, you will be able to use `inner_join()` and `left_join()` to combine data from two different tables. 
+
+## Setup
+
+In the `babynames` package, there is a table called `births`. It has just two columns:
+
+```{r}
+head(births)
+```
+
+These data come from the U.S. Census Bureau (see `help(births)` for more information). For clarity, let's copy this table into a new object with a clearer name.
+
+```{r}
+census_births <- births
+```
+
+The information about baby names is stored in the `babynames` table that we have seen previously. These data come from the Social Security Administration (see `help(babynames)` for more details). 
+
+It stands to reason that the total number of births recorded by the Census Bureau should match the total number of births as recorded by the Social Security Administration. We will investigate this claim. 
+
+We have to do a little bit of work in order to condense the SSA data into the same yearly form as the Census Bureau data. We can do this with `group_by()` and `summarize()`. 
+
+Now we have two separate tables with what should ostensibly be the same information: `census_births` and `ssa_births`. Note that they don't cover the same set of years. 
+
+```{r}
+census_births %>%
+  summarize(N = n(), 
+            earliest = min(year), 
+            latest = max(year))
+
+ssa_births %>%
+  summarize(N = n(), 
+            earliest = min(year), 
+            latest = max(year))
+```
+
+## Using a join
+
+The technique for combining two tables is called a "join." There are several different kinds of joins, which we explore in this section. Our goal is to match rows from one table that correspond to rows in a different table. 
+
+Using an `inner_join()`, the only rows in the result set will be those with corresponding matches in *both* tables. 
+
+```{r}
+census_births %>%
+  inner_join(ssa_births, by = "year") %>%
+  summarize(N = n(), 
+            earliest = min(year), 
+            latest = max(year))
+```
+
+Note that the set of years returns is the *intersection* of the two sets of years in the original tables. 
+
+Using a `left_join()`, the rows in `census_births` will always be returned, even if there is no corresponding entry in the `ssa_births` table. Rows with no corresponding entry have `NA`s that appear for the missing data.
+
+```{r}
+total_births <- census_births %>%
+  left_join(ssa_births, by = "year")
+
+total_births %>%
+  filter(is.na(births.y))
+```
+
+The data from 2012 exists in the `census_births` table, but not in the `ssa_births` table. Note that the set of years returns is no longer just the intersection. 
+
+```{r}
+total_births %>%
+  summarize(N = n(), 
+            earliest = min(year), 
+            latest = max(year))
+```
+
+Conversely, using a `right_join()` will have the opposite effect. Now there are many years of SSA data that have no match in the Census data. 
+
+```{r}
+total_births <- census_births %>%
+  right_join(ssa_births, by = "year")
+
+total_births %>%
+  filter(is.na(births.x))
+```
+
+The number of years present is also neither the intersection, nor the *union*. 
+
+```{r}
+total_births %>%
+  summarize(N = n(), 
+            earliest = min(year), 
+            latest = max(year))
+```
+
+Switching the order of the tables and switching back to `right_join()` will have the same effect. That is, `left_join(a, b)` is equivalent to `right_join(b, a)`. 
+
+```{r}
+ssa_births %>%
+  left_join(census_births, by = "year") %>%
+  summarize(N = n(), 
+            earliest = min(year), 
+            latest = max(year))
+```
+
+A `full_join()` returns all rows, regardless of whether they are matched. 
+
+```{r}
+total_births <- census_births %>%
+  full_join(ssa_births, by = "year")
+
+total_births %>%
+  filter(is.na(births.x) | is.na(births.y))
+```
+
+Now the set of years returned is the union of the years in the two tables. 
+
+```{r}
+total_births %>%
+  summarize(N = n(), 
+            earliest = min(year), 
+            latest = max(year))
+```
+
+## Reconciliation
+
+With the tables joined, we can compare the birth numbers directly. While they are strongly correlated,
+
+```{r}
+total_births %>%
+  summarize(N = n(), 
+            correlation = cor(births.x, births.y, 
+                              use = "complete.obs"))
+```
+
+the numbers are *not* the same. 
+
+```{r ggplot-births}
+library(ggplot2)
+ggplot(data = total_births, aes(x = year, y = births.x), color = "red") +
+  geom_line() + 
+  geom_line(aes(y = births.y), color = "blue")
+```
+
+> Do some detective work to find out why! _Hint: read the documentation for `babynames`_.
+
+## Your turn!
+Now let's try joining some tabvles from a dataset of your choosing. Don't have one? Try answering these questions using the `nycflights13` package.
+
+#. Compute the average arrival delay time for each carrier, and include the full name of the carrier in your result set.
+
+```{r echo = F}
+library(nycflights13)
+flights %>%
+  left_join(airlines, by = c("carrier" = "carrier")) %>%
+  group_by(name) %>%
+  summarise(avg_delay = mean(arr_delay, na.rm = TRUE))
+```
+
+
+#. What was the full name of the airport that was the most common destination from NYC in 2013? 
+
+```{r echo = F}
+flights %>%
+  left_join(select(airports, faa, name), by = c("dest" = "faa")) %>%
+  group_by(name) %>%
+  summarise(num_flights = n()) %>%
+  top_n(1)
+```
+
+#. What is the most commonly used plane? Find its manufacturer and model.
+```{r echo = F}
+flights %>%
+  inner_join(planes, by = "tailnum") %>%
+  group_by(tailnum, manufacturer, model) %>%
+  summarise(num_flights = n()) %>%
+  ungroup() %>%
+  top_n(1, num_flights)
+```
+
+#. Were there any flights that went to "mystery" airports (i.e., airports that don't appear in the `airports` table)? 
+
+```{r echo = F}
+flights %>%
+  left_join(airports, by = c("dest" = "faa")) %>%
+  summary()
+```
+
+
+#. Were there any "mystery" planes (i.e., planes that don't appear in the `planes` table)? 

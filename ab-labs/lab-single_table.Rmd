@@ -1,0 +1,253 @@
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+## A Grammar for Data Transformation
+
+The `dplyr` library provides a *grammar for data transformation*. A [grammar](https://en.wikipedia.org/wiki/Grammar) is a set of rules that govern a language. In this case, `dplyr` provides a grammar that will allow you to express ideas about how to transform data. 
+
+Note that a grammar consists of verbs, nouns, and direct objects. 
+
+```{r, message=FALSE}
+library(tidyverse)
+```
+
+**Goal**: by the end of this lab, you will be able to use `dplyr` to transform a single data table. 
+
+## The Five Verbs
+
+The creator of `dplyr`, [Hadley Wickham](https://en.wikipedia.org/wiki/Hadley_Wickham), argues that most of the operations that you need to perform on a data table can be achieved using combinations of the following five "verbs":
+
+- `select()`
+- `filter()`
+- `mutate()` (and `rename()`)
+- `arrange()`
+- `summarize()`
+
+Each of the five data "verbs" takes a data frame as its first argument and returns a data frame (actually a `tbl_df`). Because of this, these operations can be chained using the pipe operator (`%>%`) (see below).
+
+When in doubt, reference the data transformation [cheat sheet](https://www.rstudio.org/links/data_transformation_cheat_sheet). Pay careful attention to the pictures!
+
+### Load in some data
+We'll start by loading the `babynames` package, which contains data about names given to babies born in the United States beginning in 1880:
+
+```{r, message=FALSE}
+library(babynames)
+head(babynames)
+```
+
+> Tip: if you want to learn more about a package or function in R, use the ? operator like this:
+
+```{r, message=FALSE}
+?babynames
+```
+
+Now, let's play!
+
+### `select()`
+You can extract a subset of the **columns** using `select()`:
+
+```{r}
+babynames %>%
+  select(year, name, n) %>%
+  head()
+```
+
+### `filter()`
+Similarly, you can extract a subset of the **rows** using `filter()`:
+
+```{r}
+# Replace 'Jordan' with your own name if you like!
+babynames %>%
+  filter(name == "Jordan") %>%
+  head()
+```
+
+You'll notice that inside the `filter()` command is a **boolean statement** (hence the double equals sign). This is because `filter()` is akin to asking for all rows where a particular condition is true (in this case, where the value of `name` is equal to "Jordan").
+
+### Combining verbs (sneak peek)
+Like with most programming languages, we can pass the value returned by one function into another function. The following code first `filter`s the data, then `select`s some specific columns, and finally assigns the result to a new object using the `<-` operator:
+
+```{r}
+jordan <- babynames %>%
+            filter(name == "Jordan") %>%
+            select(year, name, sex, n)
+```
+
+Now let's check the dimensions of that object:
+```{r}
+dim(jordan)
+```
+
+We might also want to view the first few rows:
+```{r}
+head(jordan)
+```
+
+And maybe verify what kind of object it is:
+
+```{r}
+class(jordan)
+```
+
+Note that `jordan` is a `tbl_df`, a `tbl`, and a `data.frame`. Objects in R can have more than one type!
+
+### Visualization (sneak peek)
+Let's make a quick plot of the popularity of `Jordan` over time. To do this, we'll use the `ggplot2` package: 
+
+```{r}
+# Load ggplot
+library(ggplot2)
+
+# Create a ggplot object where:
+#   - the data is contained in the 'jordan' object
+#   - the 'year' column is mapped to the x-axis
+#   - the 'n' column is mapped to the y-axis
+ggplot(data = jordan, aes(x = year, y = n)) + #<- the '+' operator means we're adding to this plot
+  # represent the data as a line chart,
+  # break the data up by 'sex' and give each group its own color
+  geom_line(aes(color = sex))
+```
+Pretty cool, huh? Don't worry too much about the details of constructing this plot, we'll have a whole workshop on data visualization in a couple of weeks :-)
+
+### `mutate()`
+
+We use the `mutate()` verb to create new variables. Here, we'll define a variable called `popular` that is `TRUE` if the name was assigned to more than 1% of all babies in that year. 
+
+```{r, message=FALSE}
+babynames <- babynames %>%
+  mutate(popular = prop > 0.01)
+```
+
+Sometimes data comes in with weird or not-helpful variable names, but that's no problem. We can use `rename()` to rename a variable:
+
+```{r}
+babynames <- babynames %>%
+  rename(is_popular = popular)
+```
+
+Use the new variable (and `filter()`) to create a subset **of the rows**:
+
+```{r}
+popular <- babynames %>%
+  filter(is_popular)
+nrow(popular)
+head(popular)
+```
+
+What are the single most popular names of all time? To find them we can `arrange()` the table in descending order of the proportion of babies who got that name. 
+
+```{r}
+popular %>%
+  arrange(desc(prop))
+```
+
+> What does the value of the `prop` column in the first line of output above mean? Write one sentence to explain what it means to someone who has never taken a statistics course. 
+
+```{r}
+# YOUR SOLUTION HERE
+```
+
+> Next, choose a name and find the `year` in which that name was used **most frequently**. 
+
+
+```{r}
+# YOUR SOLUTION HERE
+```
+
+> What was the **most popular** name that year? 
+
+```{r}
+# YOUR SOLUTION HERE
+```
+
+Finally, think about how you might answer the following question (though you might not be able to solve it just yet):
+
+> In which year was that name given to M and F babies most equally (i.e. **closest to a 50/50 split**)?
+
+```{r}
+# YOUR SOLUTION HERE
+```
+
+The last single table verb is `summarize()` and it works a bit differently. Like all of the verbs, it takes a data table and returns a data table, but on its own, `summarize()` only returns a single row of output. In order to do this, it has to collapse entire columns into a single values. Thus, unless you tell `summarize()` **how** to condense the many pieces of information in a variable into a single value, it won't know what to do. 
+
+Here, we summarize `jordan` to find the greatest number of `Jordan`s born in a single year (to a single sex):
+
+```{r}
+jordan %>%
+  summarize(max_jordans = max(n))
+```
+
+Note the difference between this and simply sorting the data table (which we can do using the verb `arrange()`, and if we want it in **descending order** with the biggest value at the top, we'll need to include `desc()` as well):
+```{r}
+jordan %>%
+  arrange(desc(n))
+```
+If we wanted the whole row with the biggest `n`, we could also `filter()`:
+```{r}
+jordan %>%
+  filter(n == max(n))
+```
+
+
+When using `summarize()`, it is almost always a good idea to count the number of rows that you collapsed. The value of this may not be immediately obvious, but it serves as a handy self-check that I promise you will save you lots of future debugging heartache. We can do this using the `n()` function. 
+
+> Note: be careful not to confuse the function `n()`, which is always used inside a `summarize()` command, and the variable name `n`, which happens to be a column in the `babynames` table. It is purely coincidence that these have the same name!
+
+```{r}
+jordan %>%
+  summarize(num_rows = n(), max_jordans = max(n))
+```
+
+> What does the value of `num_rows` represent (in real-world terms) in the previous result? Explain what it means to another participant and argue about it until you agree.
+
+## So what's with the `%>%` operator?
+
+The pipe operator `%>%` is provided by [the `magrittr` package](https://cran.r-project.org/web/packages/magrittr/vignettes/magrittr.html). It is automatically loaded by `dplyr`. 
+
+The term `pipe` is an allusion to [the use of `|` in Unix](https://en.wikipedia.org/wiki/Vertical_bar#Pipe) to perform analogous operations.
+
+The expression:
+
+```{r, eval=FALSE}
+mydata %>%
+  verb(arguments)
+```
+
+is the same as:
+
+```{r, eval=FALSE}
+verb(mydata, arguments)
+```
+
+In effect, `function(x, args) = x %>% function(args)`.
+
+In the *grammar of data transformation*, `mydata` is a noun, `verb()` is a verb, and `arguments` are the direct objects. The pipeline is closer to how we speak in English, while the nested syntax is more like [Polish Notation](https://en.wikipedia.org/wiki/Polish_notation). 
+
+This means that instead of having to do:
+
+```{r, eval=FALSE}
+select(filter(mutate(data, arguments), arguments), arguments)
+```
+
+You can do:
+
+```{r, eval=FALSE}
+data %>%
+  mutate(arguments) %>%
+  filter(arguments) %>%
+  select(arguments)
+```
+
+> Try rewriting the following expression using the pipe operator:
+
+```{r, eval=FALSE}
+arrange(select(filter(babynames, name == "Jordan"), -name), desc(prop))
+```
+
+## Your turn!
+Now let's try these verbs out on your dataset. Can you make your transformations easier to read?
+
+<div id="license">
+This lab was built for SDS192: Introduction to Data Science by Ben Baumer at Smith College, and was modified for MassMutual DSDP by R. Jordan Crouser in June 2021.
+</div>

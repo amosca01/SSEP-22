@@ -29,7 +29,7 @@
     <h4 class="w3-text-grey">R Packages</h4>
 
     <p>
-      R is an open-source programming language, meaning that users can contribute packages that make our lives easier, and we can use them for free. For this lab, and many others in the future, we will use the following R packages:
+      R is an open-source programming language, meaning that users can contribute packages that make our lives easier, and we can use them for free. What is a package? Think of it as a neat collection of tools (that someone else built) that help us do common, repetitive tasks more efficiently. For this lab, and many others in the future, we will use the following R packages:
     </p>
     <ul>
       <li>
@@ -60,7 +60,7 @@
      <h4 class="w3-text-grey">Creating a reproducible lab report</h4>
     
     <p>
-      We will be using R Markdown to create reproducible lab reports, which are a pretty close analog to the analyses and reports you will ultimately produce here at MassMutual. See the following videos describing why and how:
+      We will be using R Markdown to create reproducible lab reports. Remember, key pieces of ethical data science are (1) transparancy in your analyses, and (2) reproducibility. See the following videos describing more about why and how we use R Markdown:
     </p>
     <p>
       <a href="https://youtu.be/lNWVQ2oxNho"><strong>Why use R Markdown for Lab Reports?</strong></a>
@@ -102,7 +102,7 @@
     <pre class="r"><code>data(package = &quot;dplyr&quot;)</code></pre>
     <blockquote>
       <p>
-        Note that not all data objects listed by <code>data()</code> are <code>data.frame</code>s! Some of them are <code>list</code>s and some have class <code>matrix</code>.
+        Note that not all data objects listed by <code>data()</code> are <code>data.frame</code>s! Some of them are <code>list</code>s and some have class <code>matrix</code>. (Don't worry about the difference between <code>data.frame</code>, <code>list</code>, and <code>matrix</code> for now, we'll dive into that later!)
       </p>
     </blockquote>
 
@@ -133,7 +133,7 @@
       </li>
     </ul>
     <p>
-      TL;DR: I can't think of any reason to use <code>read.csv()</code> when you have the option to use <code>read_csv()</code>. Using this function, you can read a CSV file from your computer, or as straight from the Internet via a <a href="https://en.wikipedia.org/wiki/URL">URL</a>. CSVs should have the file extension <code>.csv</code>. To get you started, run the following command to load the data from a comma-separated value (CSV) file hosted online:
+      TL;DR: I can't think of any reason to use <code>read.csv()</code> when you have the option to use <code>read_csv()</code>. Using this function, you can read a CSV file from your computer, or straight from the Internet via a <a href="https://en.wikipedia.org/wiki/URL">URL</a>. CSVs should have the file extension <code>.csv</code>. To get you started, run the following command to load the data from a comma-separated value (CSV) file hosted online:
     </p>
     <pre class="r"><code>magazines &lt;- read_csv(&quot;http://gattonweb.uky.edu/sheather/book/docs/datasets/magazines.csv&quot;)</code></pre>
     <p>
@@ -154,7 +154,7 @@
       </li>
     </ul>
     <p>
-      This command instructs R to load some data: specifically, revenue and advertising data from <em>Advertising Age</em>'s 14th annual Magazine 300 Report, which was released in September 2003. You should see that the workspace area in the upper righthand corner of the RStudio window now lists a dataset called <code>magazines</code> that has 204 observations on 5 variables.
+      This command instructs R to load some data (specifically, revenue and advertising data from <em>Advertising Age</em>'s 14th annual Magazine 300 Report, which was released in September 2003) and to save that data as an objet with the name  `magazines`. You should see that the workspace area in the upper righthand corner of the RStudio window now lists a dataset called <code>magazines</code> that has 204 observations (obs.) on 5 variables. The <code><-</code> symbol you used in this command is the assignment operator in R. We read this symbol as &lq;gets&rq;, for example if you were reading out loud the command we just ran you would say something like: &lq;<code>magazines</code> gets <em>Advertising Age</em> data&rq;.
     </p>
     <p>
       As you interact with R, you will create a series of objects. Sometimes you'll load them from a file as we have done here, and sometimes you'll create them yourself as the byproduct of a computation or some analysis you have performed.
@@ -229,14 +229,14 @@
     <h4 class="w3-text-grey">Data Visualization</h4>
     
     <p>
-      R has some powerful functions for making graphics. We can create a simple plot of the number of girls baptized per year with the command
+      R has some powerful functions for making graphics. We can create a simple plot of the amount of Ad Revenue per Ad Pages with the command
     </p>
     <pre class="r"><code>qplot(x = AdPages, y = AdRevenue, data = magazines)</code></pre>
     <p>
       The <code>qplot()</code> function (meaning &quot;quick plot&quot;) considers the type of data you have provided it and makes the decision to visualize it with a scatterplot. The plot should appear under the <em>Plots</em> tab of the lower right panel of RStudio.
     </p>
     <p>
-      Noticethat the command above again looks like a function, this time with three arguments separated by commas. The first two arguments in the <code>qplot()</code> function specify the variables for the x-axis and the y-axis and the third provides the name of the dataset where they can be found. If we wanted to connect the data points with lines, we could add a fourth argument to specify the geometry that we'd like.
+      Notice that the command above again looks like a function, this time with three arguments separated by commas. The first two arguments in the <code>qplot()</code> function specify the variables for the x-axis and the y-axis and the third provides the name of the dataset where they can be found. If we wanted to connect the data points with lines, we could add a fourth argument to specify the geometry that we'd like.
     </p>
     <pre class="r"><code>qplot(x = AdPages, y = AdRevenue, data = magazines, geom = &quot;line&quot;)</code></pre>
     <p>
@@ -292,13 +292,13 @@
       </li>
     </ol>
     <p>
-      This is equivalent to going through each row and adding up the <code>AdRevenue</code>, <code>SubRevenue</code>, and <code>NewsRevenue</code> values for that magazine and recording that value in a new column called <code>total</code>. We'll learn a bunch more about piping this afternoon.
+      This is equivalent to going through each row and adding up the <code>AdRevenue</code>, <code>SubRevenue</code>, and <code>NewsRevenue</code> values for that magazine and recording that value in a new column called <code>total</code>. We'll learn a bunch more about piping later.
     </p>
     <p>
       <strong>Where is the new variable? </strong> When you make changes to variables in your dataset, click on the name of the dataset again to update it in the data viewer.
     </p>
     <p>
-      You'll see that there is now a new column called <code>TotalRevenue</code> that has been tacked on to the data frame. The special symbol <code>&lt;-</code> performs an <em>assignment</em>, taking the output of one line of code and saving it into an object in your workspace. In this case, you already have an object called <code>magazines</code>, so this command updates that dataset with the new mutated column.
+      You'll see that there is now a new column called <code>TotalRevenue</code> that has been tacked on to the data frame. Remember, the special symbol <code>&lt;-</code> performs an <em>assignment</em>, taking the output of one line of code and saving it into an object in your workspace. In this case, you already have an object called <code>magazines</code>, so this command updates that dataset with the new mutated column.
     </p>
     <p>
       We can make a histogram showing how the total revenues are distributed with the command:
