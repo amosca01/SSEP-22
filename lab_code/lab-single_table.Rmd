@@ -26,10 +26,10 @@ The creator of `dplyr`, [Hadley Wickham](https://en.wikipedia.org/wiki/Hadley_Wi
 
 Each of the five data "verbs" takes a data frame as its first argument and returns a data frame (actually a `tbl_df`). Because of this, these operations can be chained using the pipe operator (`%>%`) (see below).
 
-When in doubt, reference the data transformation [cheat sheet](https://www.rstudio.org/links/data_transformation_cheat_sheet). Pay careful attention to the pictures!
+When in doubt, reference the data transformation [cheat sheet](https://www.rstudio.com/resources/cheatsheets/). Pay careful attention to the pictures!
 
 ### Load in some data
-We'll start by loading the `babynames` package, which contains data about names given to babies born in the United States beginning in 1880:
+We'll start by loading the `babynames` package, which contains data about names given to babies born in the United States beginning in 1880 (Remember: if you have not previously installed `babynames` you need to do that first (`install.packages("babynames")`).):
 
 ```{r, message=FALSE}
 library(babynames)
@@ -45,7 +45,7 @@ head(babynames)
 Now, let's play!
 
 ### `select()`
-You can extract a subset of the **columns** using `select()`:
+You can extract a subset of the **columns** using `select()` (Note: the `head()` function tells R to print only the first few rows of the data instead of the entire dataset):
 
 ```{r}
 babynames %>%
@@ -57,58 +57,58 @@ babynames %>%
 Similarly, you can extract a subset of the **rows** using `filter()`:
 
 ```{r}
-# Replace 'Jordan' with your own name if you like!
+# Replace 'Ab' with your own name if you like!
 babynames %>%
-  filter(name == "Jordan") %>%
+  filter(name == "Ab") %>%
   head()
 ```
 
-You'll notice that inside the `filter()` command is a **boolean statement** (hence the double equals sign). This is because `filter()` is akin to asking for all rows where a particular condition is true (in this case, where the value of `name` is equal to "Jordan").
+You'll notice that inside the `filter()` command is a **boolean statement** (hence the double equals sign). This is because `filter()` is akin to asking for all rows where a particular condition is true (in this case, where the value of `name` is equal to "Ab").
 
 ### Combining verbs (sneak peek)
 Like with most programming languages, we can pass the value returned by one function into another function. The following code first `filter`s the data, then `select`s some specific columns, and finally assigns the result to a new object using the `<-` operator:
 
 ```{r}
-jordan <- babynames %>%
-            filter(name == "Jordan") %>%
+ab <- babynames %>%
+            filter(name == "Ab") %>%
             select(year, name, sex, n)
 ```
 
 Now let's check the dimensions of that object:
 ```{r}
-dim(jordan)
+dim(ab)
 ```
 
 We might also want to view the first few rows:
 ```{r}
-head(jordan)
+head(ab)
 ```
 
 And maybe verify what kind of object it is:
 
 ```{r}
-class(jordan)
+class(ab)
 ```
 
-Note that `jordan` is a `tbl_df`, a `tbl`, and a `data.frame`. Objects in R can have more than one type!
+Note that `ab` is a `tbl_df`, a `tbl`, and a `data.frame`. Objects in R can have more than one type!
 
 ### Visualization (sneak peek)
-Let's make a quick plot of the popularity of `Jordan` over time. To do this, we'll use the `ggplot2` package: 
+Let's make a quick plot of the popularity of `Ab` over time. To do this, we'll use the `ggplot2` package: 
 
 ```{r}
 # Load ggplot
 library(ggplot2)
 
 # Create a ggplot object where:
-#   - the data is contained in the 'jordan' object
+#   - the data is contained in the 'ab' object
 #   - the 'year' column is mapped to the x-axis
 #   - the 'n' column is mapped to the y-axis
-ggplot(data = jordan, aes(x = year, y = n)) + #<- the '+' operator means we're adding to this plot
+ggplot(data = ab, aes(x = year, y = n)) + #<- the '+' operator means we're adding to this plot
   # represent the data as a line chart,
   # break the data up by 'sex' and give each group its own color
   geom_line(aes(color = sex))
 ```
-Pretty cool, huh? Don't worry too much about the details of constructing this plot, we'll have a whole workshop on data visualization in a couple of weeks :-)
+Pretty cool, huh? Don't worry too much about the details of constructing this plot, we'll have a whole lab on data visualization soon :-)
 
 ### `mutate()`
 
@@ -131,7 +131,7 @@ Use the new variable (and `filter()`) to create a subset **of the rows**:
 ```{r}
 popular <- babynames %>%
   filter(is_popular)
-nrow(popular)
+nrow(popular) # count number of rows 
 head(popular)
 ```
 
@@ -171,21 +171,21 @@ Finally, think about how you might answer the following question (though you mig
 
 The last single table verb is `summarize()` and it works a bit differently. Like all of the verbs, it takes a data table and returns a data table, but on its own, `summarize()` only returns a single row of output. In order to do this, it has to collapse entire columns into a single values. Thus, unless you tell `summarize()` **how** to condense the many pieces of information in a variable into a single value, it won't know what to do. 
 
-Here, we summarize `jordan` to find the greatest number of `Jordan`s born in a single year (to a single sex):
+Here, we summarize `ab` to find the greatest number of `Ab`s born in a single year (to a single sex):
 
 ```{r}
-jordan %>%
-  summarize(max_jordans = max(n))
+ab %>%
+  summarize(max_abs = max(n))
 ```
 
 Note the difference between this and simply sorting the data table (which we can do using the verb `arrange()`, and if we want it in **descending order** with the biggest value at the top, we'll need to include `desc()` as well):
 ```{r}
-jordan %>%
+ab %>%
   arrange(desc(n))
 ```
 If we wanted the whole row with the biggest `n`, we could also `filter()`:
 ```{r}
-jordan %>%
+ab %>%
   filter(n == max(n))
 ```
 
@@ -195,8 +195,8 @@ When using `summarize()`, it is almost always a good idea to count the number of
 > Note: be careful not to confuse the function `n()`, which is always used inside a `summarize()` command, and the variable name `n`, which happens to be a column in the `babynames` table. It is purely coincidence that these have the same name!
 
 ```{r}
-jordan %>%
-  summarize(num_rows = n(), max_jordans = max(n))
+ab %>%
+  summarize(num_rows = n(), max_abs = max(n))
 ```
 
 > What does the value of `num_rows` represent (in real-world terms) in the previous result? Explain what it means to another participant and argue about it until you agree.
@@ -220,7 +220,7 @@ is the same as:
 verb(mydata, arguments)
 ```
 
-In effect, `function(x, args) = x %>% function(args)`.
+In effect, `function(x, args) == x %>% function(args)`.
 
 In the *grammar of data transformation*, `mydata` is a noun, `verb()` is a verb, and `arguments` are the direct objects. The pipeline is closer to how we speak in English, while the nested syntax is more like [Polish Notation](https://en.wikipedia.org/wiki/Polish_notation). 
 
@@ -242,7 +242,7 @@ data %>%
 > Try rewriting the following expression using the pipe operator:
 
 ```{r, eval=FALSE}
-arrange(select(filter(babynames, name == "Jordan"), -name), desc(prop))
+arrange(select(filter(babynames, name == "Ab"), -name), desc(prop))
 ```
 
 ## Your turn!

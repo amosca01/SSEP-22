@@ -146,6 +146,8 @@ popular %>%
 
 ```{r}
 # YOUR SOLUTION HERE
+
+# Prop is the proportion (percentage) of bibies with that name in a given year 
 ```
 
 > Next, choose a name and find the `year` in which that name was used **most frequently**. 
@@ -153,12 +155,32 @@ popular %>%
 
 ```{r}
 # YOUR SOLUTION HERE
+
+esa <- babynames %>%
+            filter(name == "Esa") %>%
+            select(year, name, sex, n) %>%
+            arrange(desc(n))
+head(esa)
+
+esa_most_pop_yr <- 2016
+                       
+                      
 ```
 
 > What was the **most popular** name that year? 
 
 ```{r}
 # YOUR SOLUTION HERE
+
+most_pop_esa_yr <- babynames %>%
+                        filter(year == esa_most_pop_yr) %>%
+                        select(year, name, sex, prop, n) %>%
+                        arrange(desc(prop))
+
+head(most_pop_esa_yr)
+
+# The most popular name was Emma
+
 ```
 
 Finally, think about how you might answer the following question (though you might not be able to solve it just yet):
@@ -167,6 +189,13 @@ Finally, think about how you might answer the following question (though you mig
 
 ```{r}
 # YOUR SOLUTION HERE
+
+# Steps (one possible way)
+  # Split into M and F datasets 
+  # Merge by Name and year 
+  # Create column for prop_M - prop_F 
+  # Sort by new column 
+
 ```
 
 The last single table verb is `summarize()` and it works a bit differently. Like all of the verbs, it takes a data table and returns a data table, but on its own, `summarize()` only returns a single row of output. In order to do this, it has to collapse entire columns into a single values. Thus, unless you tell `summarize()` **how** to condense the many pieces of information in a variable into a single value, it won't know what to do. 
@@ -243,6 +272,14 @@ data %>%
 
 ```{r, eval=FALSE}
 arrange(select(filter(babynames, name == "Ab"), -name), desc(prop))
+
+task <- babynames %>% 
+          filter(name == "Ab") %>% 
+          select(-name) %>% 
+          arrange(desc(prop))
+
+task
+
 ```
 
 ## Your turn!

@@ -43,13 +43,13 @@
       Each of the five data &quot;verbs&quot; takes a data frame as its first argument and returns a data frame (actually a <code>tbl_df</code>). Because of this, these operations can be chained using the pipe operator (<code>%&gt;%</code>) (see below).
     </p>
     <p>
-      When in doubt, reference the data transformation <a href="https://www.rstudio.org/links/data_transformation_cheat_sheet">cheat sheet</a>. Pay careful attention to the pictures!
+      When in doubt, reference the data transformation <a href="https://www.rstudio.com/resources/cheatsheets/">cheat sheet</a>. Pay careful attention to the pictures!
     </p>
 
     <h4 class="w3-text-grey">Load in some data</h4>
     
     <p>
-      We'll start by loading the <code>babynames</code> package, which contains data about names given to babies born in the United States beginning in 1880:
+      We'll start by loading the <code>babynames</code> package, which contains data about names given to babies born in the United States beginning in 1880 (Remember: if you have not previously installed `babynames` you need to do that first (<code>install.packages("babynames")</code>)):
     </p>
     <pre class="r"><code>library(babynames)
     head(babynames)</code></pre>
@@ -66,7 +66,7 @@
     <h4><code>select()</code></h4>
     
     <p>
-      You can extract a subset of the <strong>columns</strong> using <code>select()</code>:
+      You can extract a subset of the <strong>columns</strong> using <code>select()</code> (Note: the <code>head()</code> function tells R to print only the first few rows of the data instead of the entire dataset):
     </p>
     <pre class="r"><code>babynames %&gt;%
       select(year, name, n) %&gt;%
@@ -77,12 +77,12 @@
     <p>
       Similarly, you can extract a subset of the <strong>rows</strong> using <code>filter()</code>:
     </p>
-    <pre class="r"><code># Replace &#39;Jordan&#39; with your own name if you like!
+    <pre class="r"><code># Replace &#39;Ab&#39; with your own name if you like!
     babynames %&gt;%
-      filter(name == &quot;Jordan&quot;) %&gt;%
+      filter(name == &quot;Ab&quot;) %&gt;%
       head()</code></pre>
     <p>
-      You'll notice that inside the <code>filter()</code> command is a <strong>boolean statement</strong> (hence the double equals sign). This is because <code>filter()</code> is akin to asking for all rows where a particular condition is true (in this case, where the value of <code>name</code> is equal to &quot;Jordan&quot;).
+      You'll notice that inside the <code>filter()</code> command is a <strong>boolean statement</strong> (hence the double equals sign). This is because <code>filter()</code> is akin to asking for all rows where a particular condition is true (in this case, where the value of <code>name</code> is equal to &quot;Ab&quot;).
     </p>
   
     <h4 class="w3-text-grey">Combining verbs (sneak peek)</h4>
@@ -90,43 +90,43 @@
     <p>
       Like with most programming languages, we can pass the value returned by one function into another function. The following code first <code>filter</code>s the data, then <code>select</code>s some specific columns, and finally assigns the result to a new object using the <code>&lt;-</code> operator:
     </p>
-    <pre class="r"><code>jordan &lt;- babynames %&gt;%
-                filter(name == &quot;Jordan&quot;) %&gt;%
+    <pre class="r"><code>ab &lt;- babynames %&gt;%
+                filter(name == &quot;Ab&quot;) %&gt;%
                 select(year, name, sex, n)</code></pre>
     <p>
       Now let's check the dimensions of that object:
     </p>
-    <pre class="r"><code>dim(jordan)</code></pre>
+    <pre class="r"><code>dim(ab)</code></pre>
     <p>
       We might also want to view the first few rows:
     </p>
-    <pre class="r"><code>head(jordan)</code></pre>
+    <pre class="r"><code>head(ab)</code></pre>
     <p>
       And maybe verify what kind of object it is:
     </p>
-    <pre class="r"><code>class(jordan)</code></pre>
+    <pre class="r"><code>class(ab)</code></pre>
     <p>
-      Note that <code>jordan</code> is a <code>tbl_df</code>, a <code>tbl</code>, and a <code>data.frame</code>. Objects in R can have more than one type!
+      Note that <code>ab</code> is a <code>tbl_df</code>, a <code>tbl</code>, and a <code>data.frame</code>. Objects in R can have more than one type!
     </p>
     
     <h4 class="w3-text-grey">Visualization (sneak peek)</h4>
 
     <p>
-      Let's make a quick plot of the popularity of <code>Jordan</code> over time. To do this, we'll use the <code>ggplot2</code> package:
+      Let's make a quick plot of the popularity of <code>Ab</code> over time. To do this, we'll use the <code>ggplot2</code> package:
     </p>
     <pre class="r"><code># Load ggplot
     library(ggplot2)
 
     # Create a ggplot object where:
-    #   - the data is contained in the &#39;jordan&#39; object
+    #   - the data is contained in the &#39;ab&#39; object
     #   - the &#39;year&#39; column is mapped to the x-axis
     #   - the &#39;n&#39; column is mapped to the y-axis
-    ggplot(data = jordan, aes(x = year, y = n)) + #&lt;- the &#39;+&#39; operator means we&#39;re adding to this plot
+    ggplot(data = ab, aes(x = year, y = n)) + #&lt;- the &#39;+&#39; operator means we&#39;re adding to this plot
       # represent the data as a line chart,
       # break the data up by &#39;sex&#39; and give each group its own color
       geom_line(aes(color = sex))</code></pre>
     <p>
-      Pretty cool, huh? Don't worry too much about the details of constructing this plot, we'll have a whole workshop on data visualization in a couple of weeks :-)
+      Pretty cool, huh? Don't worry too much about the details of constructing this plot, we'll have a whole lab on data visualization soon :-)
     </p>
  
     <h4><code>mutate()</code></h4>
@@ -146,7 +146,7 @@
     </p>
     <pre class="r"><code>popular &lt;- babynames %&gt;%
       filter(is_popular)
-    nrow(popular)
+    nrow(popular) # count number of rows 
     head(popular)</code></pre>
     <p>
       What are the single most popular names of all time? To find them we can <code>arrange()</code> the table in descending order of the proportion of babies who got that name.
@@ -184,19 +184,19 @@
       The last single table verb is <code>summarize()</code> and it works a bit differently. Like all of the verbs, it takes a data table and returns a data table, but on its own, <code>summarize()</code> only returns a single row of output. In order to do this, it has to collapse entire columns into a single values. Thus, unless you tell <code>summarize()</code> <strong>how</strong> to condense the many pieces of information in a variable into a single value, it won't know what to do.
     </p>
     <p>
-      Here, we summarize <code>jordan</code> to find the greatest number of <code>Jordan</code>s born in a single year (to a single sex):
+      Here, we summarize <code>ab</code> to find the greatest number of <code>Ab</code>s born in a single year (to a single sex):
     </p>
-    <pre class="r"><code>jordan %&gt;%
-      summarize(max_jordans = max(n))</code></pre>
+    <pre class="r"><code>abs %&gt;%
+      summarize(max_abs = max(n))</code></pre>
     <p>
       Note the difference between this and simply sorting the data table (which we can do using the verb <code>arrange()</code>, and if we want it in <strong>descending order</strong> with the biggest value at the top, we'll need to include <code>desc()</code> as well):
     </p>
-    <pre class="r"><code>jordan %&gt;%
+    <pre class="r"><code>ab %&gt;%
       arrange(desc(n))</code></pre>
     <p>
       If we wanted the whole row with the biggest <code>n</code>, we could also <code>filter()</code>:
     </p>
-    <pre class="r"><code>jordan %&gt;%
+    <pre class="r"><code>ab %&gt;%
       filter(n == max(n))</code></pre>
     <p>
       When using <code>summarize()</code>, it is almost always a good idea to count the number of rows that you collapsed. The value of this may not be immediately obvious, but it serves as a handy self-check that I promise you will save you lots of future debugging heartache. We can do this using the <code>n()</code> function.
@@ -206,8 +206,8 @@
         Note: be careful not to confuse the function <code>n()</code>, which is always used inside a <code>summarize()</code> command, and the variable name <code>n</code>, which happens to be a column in the <code>babynames</code> table. It is purely coincidence that these have the same name!
       </p>
     </blockquote>
-    <pre class="r"><code>jordan %&gt;%
-      summarize(num_rows = n(), max_jordans = max(n))</code></pre>
+    <pre class="r"><code>ab %&gt;%
+      summarize(num_rows = n(), max_abs = max(n))</code></pre>
     <blockquote>
       <p>
         What does the value of <code>num_rows</code> represent (in real-world terms) in the previous result? Explain what it means to another participant and argue about it until you agree.
@@ -237,7 +237,7 @@
     </p>
     <pre class="r"><code>verb(mydata, arguments)</code></pre>
     <p>
-      In effect, <code>function(x, args) = x %&gt;% function(args)</code>.
+      In effect, <code>function(x, args) == x %&gt;% function(args)</code>.
     </p>
     <p>
       In the <em>grammar of data transformation</em>, <code>mydata</code> is a noun, <code>verb()</code> is a verb, and <code>arguments</code> are the direct objects. The pipeline is closer to how we speak in English, while the nested syntax is more like <a href="https://en.wikipedia.org/wiki/Polish_notation">Polish Notation</a>.
@@ -258,7 +258,7 @@
         Try rewriting the following expression using the pipe operator:
       </p>
     </blockquote>
-    <pre class="r"><code>arrange(select(filter(babynames, name == &quot;Jordan&quot;), -name), desc(prop))</code></pre>  
+    <pre class="r"><code>arrange(select(filter(babynames, name == &quot;Ab&quot;), -name), desc(prop))</code></pre>  
   </div>
 </div>
 
