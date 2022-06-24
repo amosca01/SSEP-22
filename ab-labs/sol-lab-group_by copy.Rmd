@@ -124,7 +124,59 @@ babynames %>%
 ## Your turn!
 Now let's try these new verbs out on your own dataset. Don't have one? Try answering these questions using the `nycflights13` package.
 
-> #. What was the daily average number of flights leaving each of the three NYC airports in 2013?
+```{r}
+library(nycflights13)
+
+flights
+```
+
+#. What was the daily average number of flights leaving each of the three NYC airports in 2013?
+```{r}
+
+flights %>% 
+  group_by(origin, month, day) %>%
+  summarize(num_flight = n()) %>%
+  group_by(origin) %>%
+  summarize(avg_flights = mean(num_flight))
+
+```
 #. For each carrier, compute the number of total flights, the average departure delay, the number of unique destinations serviced, and the number of unique planes used. 
+```{r}
+
+flights %>%
+  group_by(carrier) %>% 
+  summarize(total_num_flights = n(),
+            avg_dept_delay = mean(dep_delay),
+            num_unique_dest = n_distinct(dest),
+            num_unique_planes = n_distinct(tailnum))
+
+```
 #. Plot the distribution of average daily delay time across the entire year for each of the three airports. 
+```{r}
+
+delays <- flights %>% 
+            group_by(origin, month, day) %>%
+            summarize(avg_delay = mean(dep_delay)) %>%
+            mutate(date = paste0(month, "-", day))
+
+ewr_delays <- delays %>% filter(origin == "EWR")
+  
+jfk_delays <- delays %>% filter(origin == "JFK")
+  
+lga_delays <- delays %>% filter(origin == "LGA")
+
+ggplot(ewr_delays, aes(x = avg_delay)) + 
+  geom_histogram()
+
+ggplot(jfk_delays, aes(x = avg_delay)) + 
+  geom_histogram()
+
+ggplot(lga_delays, aes(x = avg_delay)) + 
+  geom_histogram()
+
+```
 #. **Challenge**: Plot the average arrival delay time as a function of the distance flown *to the nearest 100 miles* for each of the three airports.
+```{r}
+
+
+```

@@ -25,18 +25,21 @@
       You could, of course, scan the data visually to estimate the percentages in each year:
     </p>
     <pre class="r"><code>babynames %&gt;%
-      filter(name == &quot;Jordan&quot;)</code></pre>
+      filter(name == &quot;Ellis&quot;)</code></pre>
     <p>
       But this is pretty inefficient and does not provide an exact solution.
     </p>
     <p>
-      The key to solving this problem is to recognize that we need to collapse the <strong>two</strong> rows corresponding to each assigned sex in each year into a single row that contains the information for both sexes (i.e. <code>summarize()</code>). Unfortunately, there is no way for R to know what to compute its own---we have to tell it.
+      What if instead we had a data column that told us, for each year, the ratio of F to M babies with our chosen name? The closer this ratio is to 1, the closer the numbers of M and F babies with the chosen name are to each other.
+    </p>    
+    <p>
+      The key to implementing this solution is to recognize that we need to collapse the <strong>two</strong> rows corresponding to each assigned sex in each year into a single row that contains the information for both sexes (i.e. <code>summarize()</code>). Unfortunately, there is no way for R to know what to compute its own---we have to tell it.
     </p>
     <p>
       The <code>group_by()</code> function specifies a variable on which the data frame will be collapsed. Each row in the result set will correspond to one unique value of that variable. In this case, we want to group by <code>year</code>. [This is sometimes called <strong>&quot;rolling up&quot;</strong> a data set.]
     </p>
     <pre class="r"><code>babynames %&gt;%
-      filter(name == &quot;Jordan&quot;) %&gt;%
+      filter(name == &quot;Ellis&quot;) %&gt;%
       group_by(year)</code></pre>
     <p>
       This doesn't seem to do much at first glance, because we haven't asked R to compute anything: we've just asked it to reorganize the data into groups based on the variable <code>year</code>. But that's about to change!
@@ -52,25 +55,25 @@
       Remember that <code>summarize()</code> takes a list of definitions for columns you want to see in the result set. The key to understanding <code>summarize()</code> is to note that it operates on vectors (which may contain many values), but each variable defined within <code>summarize()</code> <strong>must return a single value</strong> (per group). [Why?]
     </p>
     <p>
-      Thus, the variables defined by the arguments to <code>summarize()</code> usually involve <em>aggregate</em> functions like <code>sum()</code>, <code>mean()</code>, <code>length()</code>, <code>max()</code>, <code>n()</code>, etc. In this case, we can use the conditional <code>ifelse()</code> statement around a <code>sum()</code> to extract the number of <code>F</code> babies born in each year [this will be our numberator], and another one to extract the total number of <code>M</code> babies bown in that same year [this will be our denominator]:
+      Thus, the variables defined by the arguments to <code>summarize()</code> usually involve <em>aggregate</em> functions like <code>sum()</code>, <code>mean()</code>, <code>length()</code>, <code>max()</code>, <code>n()</code>, etc. In this case, we can use the conditional <code>ifelse()</code> statement around a <code>sum()</code> to extract the number of <code>F</code> babies born in each year [this will be our numerator], and another one to extract the total number of <code>M</code> babies born in that same year [this will be our denominator]:
     </p>
     <pre class="r"><code>babynames %&gt;%
-      filter(name == &quot;Jordan&quot;) %&gt;%
+      filter(name == &quot;Ellis&quot;) %&gt;%
       group_by(year) %&gt;%
       summarize(N = n(), 
                 ratio = sum(ifelse(sex == &quot;F&quot;, n, 0)) / 
                         sum(ifelse(sex == &quot;M&quot;, n, 0)))</code></pre>
     <p>
-      Now all that's left is to look for the year with a <code>ratio</code> that's closest to 0.5. Since we don't care whether the closest value is over or under, we can just subtract that <code>ratio</code> from 1 and take the absolute value. Then all we have to do is <code>arrange()</code> by the resulting value:
+      Now all that's left is to look for the year with a <code>ratio</code> that's closest to 1. Since we don't care whether the closest value is over or under, we can just subtract that <code>ratio</code> from 1 and take the absolute value. Then all we have to do is <code>arrange()</code> by the resulting value:
     </p>
     <pre class="r"><code>babynames %&gt;%
-      filter(name == &quot;Jordan&quot;) %&gt;%
+      filter(name == &quot;Ellis&quot;) %&gt;%
       group_by(year) %&gt;%
       summarize(N = n(), 
                 ratio = sum(ifelse(sex == &quot;F&quot;, n, 0)) / 
                         sum(ifelse(sex == &quot;M&quot;, n, 0)),
                 howfaroff = abs(1 - ratio)) %&gt;%
-      filter(N == 2)  %&gt;%
+      filter(N == 2)  %&gt;% # Filter to years where there were M and F babies with name
       arrange(howfaroff)</code></pre>
     <p>
       Let's take these functions out for a spin by answering a couple of questions!
