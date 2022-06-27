@@ -23,16 +23,20 @@
     </p>
     <pre class="r"><code>census_births &lt;- births</code></pre>
     <p>
-      The information about baby names is stored in the <code>babynames</code> table that we have seen previously. These data come from the Social Security Administration (see <code>help(babynames)</code> for more details).
+      The information about baby names is stored in the <code>babynames</code> table that we have seen previously. These data come from the Social Security Administration (see <code>help(babynames)</code> for more details). For clarity, let's copy this table into a new object with a clearer name as well.
     </p>
+    <pre class="r"><code>ssa_births &lt;- babynames</code></pre>
     <p>
       It stands to reason that the total number of births recorded by the Census Bureau should match the total number of births as recorded by the Social Security Administration. We will investigate this claim.
     </p>
     <p>
       We have to do a little bit of work in order to condense the SSA data into the same yearly form as the Census Bureau data. We can do this with <code>group_by()</code> and <code>summarize()</code>.
     </p>
+    <pre class="r"><code>ssa_births &lt;- ssa_births %&gt;%
+      group_by(year) %>%
+      summarize(N = sum(n))</code></pre>
     <p>
-      Now we have two separate tables with what should ostensibly be the same information: <code>census_births</code> and <code>ssa_births</code>. Note that they don't cover the same set of years.
+      Now we have two separate tables with what should ostensibly be the same information: <code>census_births</code> and <code>ssa_births</code>. However,  they don't cover the same set of years. Hmmm... What if we combine these tables so that we can see which years have the same amount of births?
     </p>
     <pre class="r"><code>census_births %&gt;%
       summarize(N = n(), 
@@ -51,72 +55,69 @@
 
     <h3 class="w3-text-grey">Using a join</h3>
     <p>
-      The technique for combining two tables is called a &quot;join.&quot; There are several different kinds of joins, which we explore in this section. Our goal is to match rows from one table that correspond to rows in a different table.
+      The technique for combining two tables is called a &quot;join.&quot; There are several different kinds of joins, which we explore in this section. Our goal with a join is to match rows from one table that correspond to rows in a different table.
     </p>
     <p>
       Using an <code>inner_join()</code>, the only rows in the result set will be those with corresponding matches in <em>both</em> tables.
     </p>
-    <pre class="r"><code>census_births %&gt;%
-      inner_join(ssa_births, by = &quot;year&quot;) %&gt;%
+    <pre class="r"><code>total_births_inner &lt; - census_births %&gt;%
+      inner_join(ssa_births, by = &quot;year&quot;) 
+
+    total_births_inner %&gt;%
       summarize(N = n(), 
                 earliest = min(year), 
                 latest = max(year))</code></pre>
     <p>
-      Note that the set of years returns is the <em>intersection</em> of the two sets of years in the original tables.
+      Note that the set of years returned is the <em>intersection</em> of the two sets of years in both the original <code>ssa_births</code> AND <code>census_births</code> tables.
     </p>
     <p>
-      Using a <code>left_join()</code>, the rows in <code>census_births</code> will always be returned, even if there is no corresponding entry in the <code>ssa_births</code> table. Rows with no corresponding entry have <code>NA</code>s that appear for the missing data.
+      Using a <code>left_join()</code> to join <code>census_births</code> and <code>ssa_births</code> will result in the rows in <code>census_births</code> all being returned, even if there is no corresponding entry in the <code>ssa_births</code> table. Rows with no corresponding entry have <code>NA</code>s that appear for the missing data.
     </p>
-    <pre class="r"><code>total_births &lt;- census_births %&gt;%
+    <pre class="r"><code>total_births_left &lt;- census_births %&gt;%
       left_join(ssa_births, by = &quot;year&quot;)
 
-    total_births %&gt;%
-      filter(is.na(births.y))</code></pre>
+    total_births_left %&gt;%
+      filter(is.na(N))</code></pre>
     <p>
-      The data from 2012 exists in the <code>census_births</code> table, but not in the <code>ssa_births</code> table. Note that the set of years returns is no longer just the intersection.
-    </p>
-    <pre class="r"><code>total_births %&gt;%
-      summarize(N = n(), 
-                earliest = min(year), 
-                latest = max(year))</code></pre>
-    <p>
-      Conversely, using a <code>right_join()</code> will have the opposite effect. Now there are many years of SSA data that have no match in the Census data.
-    </p>
-    <pre class="r"><code>total_births &lt;- census_births %&gt;%
-      right_join(ssa_births, by = &quot;year&quot;)
+      Looks like all of the years in the <code>census_births</code> table are in the <code>ssa_births</code> table. Just to prove to ourselves that <code>left_join</code> works as described, let's do an experiment. 
+    </p> 
+    <pre class="r"><code># create a version of ssa_births missing year 2012
+    ssa_births_no_2012 &lt;- ssa_births %&gt;%
+      filter(year != 2012)
 
-    total_births %&gt;%
-      filter(is.na(births.x))</code></pre>
+    total_births_left &lt;- census_births %&gt;%
+      left_join(ssa_births_no_2012, by = &quot;year&quot;)
+
+    total_births_left %&gt;%
+      filter(is.na(N))</code></pre>
     <p>
-      The number of years present is also neither the intersection, nor the <em>union</em>.
+      The data from 2012 exists in the <code>census_births</code> table, but not in the <code>ssa_births_no_2012</code> table. 
     </p>
-    <pre class="r"><code>total_births %&gt;%
-      summarize(N = n(), 
-                earliest = min(year), 
-                latest = max(year))</code></pre>
+    <p>
+      Conversely, using a <code>right_join()</code> to join <code>census_births</code> and <code>ssa_births</code> will have the opposite effect. Specifically, it will result in the rows in <code>ssa_births</code> all being returned, even if there is no corresponding entry in the <code>census_births</code> table. Rows with no corresponding entry have <code>NA</code>s that appear for the missing data. Notice there are many years of SSA data that have no match in the Census data. 
+    </p>
+    <pre class="r"><code>total_births_right &lt;- census_births %&gt;%
+      right_join(ssa_births_no_2012, by = &quot;year&quot;)
+
+    total_births_right %&gt;%
+      filter(is.na(births))</code></pre>
     <p>
       Switching the order of the tables and switching back to <code>right_join()</code> will have the same effect. That is, <code>left_join(a, b)</code> is equivalent to <code>right_join(b, a)</code>.
     </p>
     <pre class="r"><code>ssa_births %&gt;%
       left_join(census_births, by = &quot;year&quot;) %&gt;%
-      summarize(N = n(), 
-                earliest = min(year), 
-                latest = max(year))</code></pre>
+      filter(is.na(births))</code></pre>
     <p>
-      A <code>full_join()</code> returns all rows, regardless of whether they are matched.
+      Finally, a <code>full_join()</code> returns all rows from both tables, regardless of whether they are matched.
     </p>
     <pre class="r"><code>total_births &lt;- census_births %&gt;%
-      full_join(ssa_births, by = &quot;year&quot;)
+      full_join(ssa_births_no_2012, by = &quot;year&quot;)
 
     total_births %&gt;%
-      filter(is.na(births.x) | is.na(births.y))</code></pre>
+      filter(is.na(births) | is.na(N))</code></pre>
     <p>
       Now the set of years returned is the union of the years in the two tables.
     </p>
-    <pre class="r"><code>total_births %&gt;%
-      summarize(N = n(), 
-                earliest = min(year), 
-                latest = max(year))</code></pre>
   </div>
 </div>
 
@@ -125,19 +126,25 @@
 
     <h3 class="w3-text-grey">Reconciliation</h3>
     <p>
-      With the tables joined, we can compare the birth numbers directly. While they are strongly correlated,
+      With the tables joined, we can compare the birth numbers directly. Let's look at whether all of the numbers are the same. 
+    </p> 
+    <pre class="r"><code>total_births %&gt;%
+      mutate(census_equals_ssa = births == N) %&gt;%
+      filter(census_equals_ssa == FALSE) %&gt;% 
+      summarise(num_different_counts = n())</code></pre>
+    <p>
+      Uh-oh. Looks like the counts are mostly not the same. While they are strongly correlated,
     </p>
     <pre class="r"><code>total_births %&gt;%
-      summarize(N = n(), 
-                correlation = cor(births.x, births.y, 
+      summarize(correlation = cor(births.x, births.y, 
                                   use = &quot;complete.obs&quot;))</code></pre>
     <p>
       the numbers are <em>not</em> the same.
     </p>
     <pre class="r"><code>library(ggplot2)
-    ggplot(data = total_births, aes(x = year, y = births.x), color = &quot;red&quot;) +
-      geom_line() + 
-      geom_line(aes(y = births.y), color = &quot;blue&quot;)</code></pre>
+    ggplot(data = total_births, aes(x = year, y = births)) +
+      geom_line(color = color = &quot;red&quot;) + 
+      geom_line(aes(y = N), color = &quot;blue&quot;)</code></pre>
     <blockquote>
       <p>
         Do some detective work to find out why! <em>Hint: read the documentation for <code>babynames</code></em>.

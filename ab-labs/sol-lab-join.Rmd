@@ -171,10 +171,48 @@ Now let's try joining some tabvles from a dataset of your choosing. Don't have o
 
 #. Compute the average arrival delay time for each carrier, and include the full name of the carrier in your result set.
 
+```{r echo = F}
+library(nycflights13)
+flights %>%
+  left_join(airlines, by = c("carrier" = "carrier")) %>%
+  group_by(name) %>%
+  summarise(avg_delay = mean(arr_delay, na.rm = TRUE))
+```
+
+
 #. What was the full name of the airport that was the most common destination from NYC in 2013? 
 
+```{r echo = F}
+flights %>%
+  left_join(select(airports, faa, name), by = c("dest" = "faa")) %>%
+  group_by(name) %>%
+  summarise(num_flights = n()) %>%
+  top_n(1)
+```
+
 #. What is the most commonly used plane? Find its manufacturer and model.
+```{r echo = F}
+flights %>%
+  inner_join(planes, by = "tailnum") %>%
+  group_by(tailnum, manufacturer, model) %>%
+  summarise(num_flights = n()) %>%
+  ungroup() %>%
+  top_n(1, num_flights)
+```
 
 #. Were there any flights that went to "mystery" airports (i.e., airports that don't appear in the `airports` table)? 
 
+```{r echo = F}
+flights %>%
+  left_join(airports, by = c("dest" = "faa")) %>%
+  summary()
+```
+
+
 #. Were there any "mystery" planes (i.e., planes that don't appear in the `planes` table)? 
+
+```{r echo = F}
+flights %>%
+  left_join(planes, by = "tailnum") %>%
+  summary()
+```
