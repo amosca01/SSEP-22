@@ -13,7 +13,7 @@ library(babynames)
 
 ## What does `tidy` mean, and why do we care?
 
-**Tidy** data are usually long and narrow. That is, it may have many rows, but relatively few columns. However, data are often stored in spreadsheets in a **wide** format (which may have more columns that rows) because the wide format is easier to **see** in a spreadsheet.
+**Tidy** data are usually long and narrow. That is, it may have many rows, but relatively few columns. However, data are often stored in spreadsheets in a **wide** format (which may have more columns than rows) because the wide format is easier to **see** in a spreadsheet.
 
 However, it turns out that there are lots of good reasons to keep data in a `tidy` format:
 
@@ -30,7 +30,7 @@ To recap:
 - `pivot_longer()` takes a data table in a **wide** format and converts it into a tidy format. 
 - `pivot_wider()` does the opposite (and accordingly, is used less frequently). 
 
-## An example: making wide tables narrow with `pivot_wider()`
+## An example: making wide tables narrow with `pivot_longer()`
 We (unwittingly) came up with an example yesterday. Recall that the `total_births` data frame looks like this:
 
 ```{r}
@@ -60,7 +60,7 @@ This data frame has 109 rows and 3 columns:
 dim(total_births)
 ```
 
-...but what we want is a data frame that has 218 rows and three columns: `year`, `source`, and `births`. This data frame would be tidy, because like is stored with like. The `pivot_longer()` function will help us get there.  
+...but what we want is a data frame that has 218 rows and three columns: `year`, `source`, and `births`. This data frame would be tidy, because it has fewer columns. The `pivot_longer()` function will help us get there.  
 
 ```{r}
 births_tidy <- total_births %>%
@@ -76,7 +76,7 @@ dim(births_tidy)
 
 See what happened? View `births_tidy` in several different ways if necessary, and make sure that you understand where each piece of data went. 
 
-Foreshadowing what we'll learn about data visualization in a couple of weeks, we can now map `year` to the x axis, `births`= to the y axis, and use color to encode the `source`:
+Foreshadowing what we'll learn about data visualization soon, we can now make a chart that maps `year` to the x axis, `births`= to the y axis, and uses color to encode the `source`:
 
 ```{r}
 ggplot(data = births_tidy, aes(x = year, y = births, color = source)) +
@@ -96,7 +96,7 @@ Try this process out for yourself with a [Gapminder dataset](http://www.gapminde
 > Read the CSV into R using `read_csv()`. Pay careful attention to the path names! Your code will look something like this:
 
 ```{r}
-hiv <- read_csv("~/Downloads/sh_dyn_aids_zs.csv")
+hiv <- read_csv("~/Downloads/hiv_deaths_in_children_1_59_months_total_deaths.csv")
 ```
 
 #### Step 3:
@@ -117,6 +117,8 @@ dim(hiv)
 > Use `pivot_longer()` and/or `pivot_wider()` to convert your data into a tidy format. Check that it has the right dimensions. 
 
 ```{r}
+hiv["2018"] <- as.character(hiv["2018"])
+
 hiv <- hiv %>%
   pivot_longer(-country, 
                names_to = "year", 
@@ -132,8 +134,7 @@ hiv <- hiv %>%
 hiv %>%
   ggplot(aes(x = as.numeric(year), 
              y = est_prevalence, 
-             group = country,
-             color = est_prevalence)) +
+             group = country)) +
   geom_line() +
   xlim(c(1990, 2011))
 ```

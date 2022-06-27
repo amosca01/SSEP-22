@@ -13,7 +13,7 @@
 
     <h3 class="w3-text-grey">What does <code>tidy</code> mean, and why do we care?</h3>
     <p>
-      <strong>Tidy</strong> data are usually long and narrow. That is, it may have many rows, but relatively few columns. However, data are often stored in spreadsheets in a <strong>wide</strong> format (which may have more columns that rows) because the wide format is easier to <strong>see</strong> in a spreadsheet.
+      <strong>Tidy</strong> data are usually long and narrow. That is, it may have many rows, but relatively few columns. However, data are often stored in spreadsheets in a <strong>wide</strong> format (which may have more columns than rows) because the wide format is easier to <strong>see</strong> in a spreadsheet.
     </p>
     <p>
       However, it turns out that there are lots of good reasons to keep data in a <code>tidy</code> format:
@@ -56,7 +56,7 @@
 <div class="w3-row w3-padding-0">
   <div class="w3-twothird w3-container w3-margin-top">
 
-    <h3 class="w3-text-grey">An example: making wide tables narrow with <code>pivot_wider()</code></h3>
+    <h3 class="w3-text-grey">An example: making wide tables narrow with <code>pivot_longer()</code></h3>
     <p>
       We (unwittingly) came up with an example yesterday. Recall that the <code>total_births</code> data frame looks like this:
     </p>
@@ -82,7 +82,7 @@
     </p>
     <pre class="r"><code>dim(total_births)</code></pre>
     <p>
-      ...but what we want is a data frame that has 218 rows and three columns: <code>year</code>, <code>source</code>, and <code>births</code>. This data frame would be tidy, because like is stored with like. The <code>pivot_longer()</code> function will help us get there.
+      ...but what we want is a data frame that has 218 rows and three columns: <code>year</code>, <code>source</code>, and <code>births</code>. This data frame would be tidy, because it has fewer columns. The <code>pivot_longer()</code> function will help us get there.
     </p>
     <pre class="r"><code>births_tidy &lt;- total_births %&gt;%
       pivot_longer(cols = c(ssa, census), 
@@ -97,7 +97,7 @@
       See what happened? View <code>births_tidy</code> in several different ways if necessary, and make sure that you understand where each piece of data went.
     </p>
     <p>
-      Foreshadowing what we'll learn about data visualization in a couple of weeks, we can now map <code>year</code> to the x axis, <code>births</code>= to the y axis, and use color to encode the <code>source</code>:
+      Foreshadowing what we'll learn about data visualization soon, we can now make a chart that maps <code>year</code> to the x axis, <code>births</code>= to the y axis, and uses color to encode the <code>source</code>:
     </p>
     <pre class="r"><code>ggplot(data = births_tidy, aes(x = year, y = births, color = source)) +
       geom_line() </code></pre>
