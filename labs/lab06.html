@@ -28,7 +28,9 @@
       head(1) %&gt;%
       select(year)</code></pre>
     <p>
-      But we might want to do this for many names, and it would be tedious to have to re-type -- or even just re-run -- the same code over and over again. An elegant solution is to write a function. For example, here we write a function called <code>most_popular_year()</code> that will return the year in which a specific name was most popular.
+      But what if I asked you to do this for each of your classmates' names? Or for the names of everyone in your high school, your town, or your state? It would be tedious to have to re-type -- or even just re-run -- the same code over and over again. This is where functions come in. Functions allow us to package up code we want to run repeatedly into one command.  
+
+      An elegant solution for repeating actions is to write a function. For example, here we write a function called <code>most_popular_year()</code> that will return the year in which a specific name was most popular.
     </p>
     <pre class="r"><code>most_popular_year &lt;- function(name_arg) {
       babynames %&gt;%
@@ -100,7 +102,7 @@
     </p>
     <pre class="r"><code>most_popular_year_with_default()</code></pre>
     <p>
-      We can still of course still override the default value of <code>name_arg</code>:
+      We can still of course override the default value of <code>name_arg</code>:
     </p>
     <pre class="r"><code>most_popular_year_with_default(name_arg = &quot;Jordan&quot;)</code></pre>
   </div>
@@ -111,7 +113,7 @@
 
     <h3 class="w3-text-grey">Scoping</h3>
     <p>
-      How did our function know about the <code>babynames</code> table? Why wasn't that an input to the function? The answer to the first question involes the notion of <a href="http://adv-r.had.co.nz/Functions.html#lexical-scoping">variable scoping</a>, while the answer to the second question is a design choice.
+      How did our function know about the <code>babynames</code> table? Why wasn't that an input to the function? The answer to the first question involves the notion of <a href="http://adv-r.had.co.nz/Functions.html#lexical-scoping">variable scoping</a>, while the answer to the second question is a design choice.
     </p>
     <p>
       The rules for variable scoping in R are...complicated. But what is important for you to understand is that R will look for objects in the global environment if it can't find them locally. So when we run <code>most_popular_year()</code>, R will look for a data frame called <code>babynames</code> in the global environment. If it exists, then the function should work, but if not, it won't. Thus, whether a user-defined function in R works as expected depends on what is in the global environment. This behavior is different than most compiled programming languages (e.g. C++, Java, etc.), but it is designed to make it easy to script with functions on-the-fly.
@@ -211,7 +213,7 @@
     
     <h4 class="w3-text-grey"><code>map()</code></h4>
     <p>
-      But what if we had a long list of names? We wouldn't want to have to copy and paste that code repeatedly. The solution is to create a vector that contains the names we're interested in, and then use the <code>map()</code> function to apply the function to each item in the vector. To read more about this function, type <code>?map</code> at the console.
+      But what if we had a long list of names? We wouldn't want to have to copy and paste the function call repeatedly. The solution is to create a vector that contains the names we're interested in, and then use the <code>map()</code> function to apply our function to each item in the vector. To read more about this function, type <code>?map</code> at the console.
     </p>
     <blockquote>
       <p>
@@ -219,19 +221,19 @@
       </p>
     </blockquote>
     <p>
-      For example, the people in Jordan's family have the following names:
+      For example, Ab's friends have the following names:
     </p>
-    <pre class="r"><code>jordans_family &lt;- c(&quot;Jordan&quot;, &quot;Morganne&quot;, &quot;Logan&quot;, &quot;Charlie&quot;)</code></pre>
+    <pre class="r"><code>abs_family &lt;- c(&quot;Jordan&quot;, &quot;Kaden&quot;, &quot;Kylee&quot;, &quot;Felix&quot;)</code></pre>
     <p>
       In order to call the <code>most_popular_year()</code> function on each of those names, we can write:
     </p>
-    <pre class="r"><code>map(jordans_family, most_popular_year)</code></pre>
+    <pre class="r"><code>map(abs_family, most_popular_year)</code></pre>
     <p>
       The <code>map()</code> function will always return a <code>list</code> -- a data structure that we have not talked about much. In order to flatten the list, we need to use one of the <code>map_*()</code> functions that specifies the return data type. In this case, since <code>most_popular_year()</code> returns a <code>data.frame</code>, we use the <code>map_df()</code> function.
     </p>
-    <pre class="r"><code>map_df(jordans_family, most_popular_year)</code></pre>
+    <pre class="r"><code>map_df(abs_family, most_popular_year)</code></pre>
     
-    <h4 class="w3-text-grey">A note on <code>for</code> loops</h4>
+    <h4 class="w3-text-grey">A note on <code>for</code> loops (if you're familiar with them)</h4>
     <p>
       Logically, using <code>map()</code> is very much like using a <code>for</code> loop. <code>for</code> loops are perfectly acceptable in R, but are not part of the <em>en vogue</em> R coding style. Additionally there are situations in which <code>for</code> loops are less efficient than <code>map()</code>.
     </p>

@@ -79,7 +79,7 @@
       </li>
     </ul>
     <p>
-      Using <code>ggplot2</code>, we can specify different parts of the plot, and combine them together using the <code>+</code> operator. [Note that the <code>+</code> operator is similar to the <code>%&gt;%</code> pipe operator but is <strong>not</strong> interchangeable!]
+      Using <code>ggplot2</code>, we can specify different parts of the plot, and combine them together using the <code>+</code> operator. 
     </p>
   </div>
 </div>
@@ -175,105 +175,102 @@
     <p>
       <img src="img/scatterplot-example-1.png" width="100%" />
     </p>
-    <blockquote>
-      <p>
-        Create a scatterplot of the value of each home in the first quarter of 2013 as a function of the value of the land.
-      </p>
-    </blockquote>
-    <pre class="r"><code># sample solution
-    ggplot(hp2013Q1, aes(y = Home.Value, x = Land.Value)) + 
-      geom_point()</code></pre>
     
     <h4 class="w3-text-grey">Plot objects</h4>
     <p>
-      The output of the <code>ggplot()</code> function is an object. Since we want to modify the plot that we created above, it’s helpful to store the plot as an object.
+      The output of the <code>ggplot()</code> function is an object. If we want to modify the plot that we created above, it’s helpful to store the plot as an object.
     </p>
-    <pre class="r"><code>base_plot <- ggplot(hp2013Q1, 
-        aes(y = Structure.Cost, x = Land.Value))</code></pre>
+    <pre class="r"><code>p1 <- ggplot(hp2013Q1, 
+        aes(x = Land.Value,
+            y = Structure.Cost))</code></pre>
     <p>
-      To actually show the plot, we just print it. Note that this plot doesn’t show anything because we haven’t added any <code>geom</code>s yet! Still, the aesthetic mapping are defined, and any subsequent <code>geom</code>s that we add will use those mappings.
+      To actually show the plot, we just print it. Note: the aesthetic mappings defined in p1, will be used by any subsequent <code>geom</code>s that we add unless we override them.
     </p>
-    <pre class="r"><code>base_plot +
-      geom_point()</code></pre>
-    <blockquote>
-      <p>
-        Store the scatterplot that you created in the previous exercise as an object called <code>home_value_plot</code>.
-      </p>
-    </blockquote>
-    <pre class="r"><code># sample solution
-      home_value_plot <- ggplot(hp2013Q1,
-      aes(y = Home.Value, x = Land.Value)) + 
-    geom_point()</code></pre>
+    <pre class="r"><code>p</code></pre>
 
     <h4 class="w3-text-grey">Lines</h4>
     <p>
-      A plot constructed with <code>ggplot</code> can have more than one <code>geom</code>. In that case, the mappings established in the <code>ggplot()</code> call are plot defaults that can be added to or overridden. For example, we could connect all of the points using <code>geom_line()</code>. Note that now we see both points <strong>and</strong> lines!
+      A plot constructed with <code>ggplot</code> can have more than one <code>geom</code>. In that case, the mappings established in the <code>ggplot()</code> call are plot defaults that can be added to or overridden. For example, we could add an aesthetic mapping for color to <code>Home.Value</code>:
     </p>
-     <pre class="r"><code>base_plot + 
-      geom_point() + 
-      geom_line()</code></pre>
+     <pre class="r"><code>p1 + 
+      geom_point(aes(color = Home.Value))</code></pre>
     <p>
-      <img src="img/geom_line-1.png" width="100%"/>
+      <img src="img/geom_point-color.png" width="100%"/>
     </p>
-    <blockquote>
-      <p>
-        Does it makes sense to connect the observations with <code>geom_line()</code> in this case? Do the lines help us understand the connections between the observations better? What do the lines represent?
-      </p>
-    </blockquote>
+    <p>
+      And we could add a regression line to our plot:
+    </p>
+     <pre class="r"><code>p1 + 
+      geom_smooth(method = "lm"))</code></pre>
+    <p>
+      <img src="img/geom_point-color-reg.png" width="100%"/>
+    </p>
 
     <h4 class="w3-text-grey">Smoothers</h4>
     <p>
       Not all geometric objects are simple shapes—<code>geom_smooth()</code> includes both a line and a ribbon.
     </p>
-     <pre class="r"><code>base_plot + 
-      geom_point() + 
+    <pre class="r"><code>p1 + 
+      geom_point(aes(color = Home.Value)) + 
       geom_smooth()</code></pre>
     <p>
       <img src="img/smoother-example-1.png" width="100%"/>
+    </p>
+
+    <h4 class="w3-text-grey">Removing standard errors</h4>
+    <p>
+      If you don't need the error bands, just set <code>se = False</code> inside the call to <code>geom_smooth()</code> to remove them: 
+    </p>
+    <pre class="r"><code>p1 + 
+      geom_point(aes(color = Home.Value)) + 
+      geom_smooth(se = FALSE)</code></pre>
+    <p>
+      <img src="img/smoother-example-2.png" width="100%"/>
     </p>
     
     <h4 class="w3-text-grey">Text</h3>
     <p>
       Each <code>geom</code> accepts a particular set of aesthetics (i.e., mappings)—for example <code>geom_text()</code> accepts a <code>labels</code> mapping.
     </p>
-    <pre class="r"><code>base_plot + 
+    <pre class="r"><code>p1 + 
+      geom_point(aes(color = Home.Value)) +
       geom_text(aes(label = State), size = 3)</code></pre>
     <p>
       <img src="img/text-sample-1.png" width="100%"/>
     </p>
+    <blockquote>
+      <p>
+        Try playing around with the <code>position</code> or <code>nudge_x/nudge_y</code> arguments to <code>geom_text</code> to see if you can offset the label from the associated point a bit.
+      </p>
+    </blockquote>
     
     <h4 class="w3-text-grey">Aesthetic Mapping vs. Assignment</h4>
     <p>
       Note that variables are mapped to aesthetics with the <code>aes()</code> function, while fixed visual cues are set outside the <code>aes()</code> call. This sometimes leads to confusion, as in this example:
     </p>
-    <pre class="r"><code>base_plot + 
+    <pre class="r"><code>p1 + 
       geom_point(aes(size = 2), # not what you want because 2 is not a variable
                 color = "red") # this is fine -- turns all points red</code></pre>
     <p>
       <img src="img/right-vs-wrong-aes-1.png" width="100%"/>
     </p>
     <p>
-      The <code>aes()</code> function can also be used outside of a call to a <code>geom</code>. Here, we update the <code>base_plot</code> to map color to home value.
+      Notice how we get a pretty useless legend for size? That's because <code>R</code> is interpreting the constant <code>2</code> as a variable (just a boring one containing a single value) and so produces a legend by default.
     </p>
-    <pre class="r"><code>base_plot <- base_plot +
-      aes(color = Home.Value)</code></pre>
     <blockquote>
       <p>
-        In your <code>home_value_plot</code>, map color to the cost of the structure and show your scatterplot.
+        Modify the code above to get rid of the legend by assigning the <code>size</code> attribute outside the call to <code>aes()</code>. While you're at it, try mapping <code>region</code> to <code>color</code> to see if there are any interesting patterns!
       </p>
     </blockquote>
-    <pre class="r"><code># sample solution
-      home_value_plot + 
-      aes(color = Structure.Cost) + 
-      geom_point()</code></pre>
-
+    
     <h4 class="w3-text-grey">Mapping Variables to Other Aesthetics</h4>
     <p>
       Other aesthetics are mapped in the same way as <code>x</code> and <code>y</code> in the previous example.
     </p>
-     <pre class="r"><code>base_plot + 
-      geom_point(aes(shape = region))</code></pre>
-    <pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
+   <pre class="r"><code>p1 + 
+    geom_point(aes(color = region, 
+                    shape = region),
+                size = 5)</code></pre>
     <p>
       <img src="img/other-aes-example-1.png" width="100%"/>
     </p>
@@ -304,9 +301,11 @@
         <code>linetype</code>
       </li>
     </ul>
-    <p>
-      Scales are modified with a series of functions using a <code>scale_&lt;aesthetic&gt;_&lt;type&gt;</code> naming scheme. Try typing <code>scale_&lt;tab&gt;</code> to see a list of scale modification functions.
-    </p>
+    <blockquote>
+      <p>
+        Scales are modified with a series of functions using a <code>scale_&lt;aesthetic&gt;_&lt;type&gt;</code> naming scheme. Try typing <code>scale_&lt;tab&gt;</code> to see a list of scale modification functions, then play around to make the plot above look a little nicer.
+      </p>
+    </blockquote>
 
     <h4 class="w3-text-grey">Common Scale Arguments</h4>
     <p>
@@ -326,44 +325,59 @@
         <code>labels</code>: the text that appear at each break
       </li>
     </ul>
-    <p>
-      Specific scale functions may have additional arguments; for example, the <code>scale_color_continuous()</code> function has arguments <code>low</code> and <code>high</code> for setting the colors at the low and high end of the scale.
-    </p>
+    <blockquote>
+      <p>
+        Specific scale functions may have additional arguments; for example, the <code>scale_color_continuous()</code> function has arguments <code>low</code> and <code>high</code> for setting the colors at the low and high end of the scale. Try playing around with the color scale to keep the outliers from dominating in this plot:
+      </p>
+    </blockquote>
+    <pre class="r"><code>p1 + 
+    geom_point(aes(color = Home.Value))</code></pre>
     
     <h4 class="w3-text-grey">Scale Modification Examples</h4>
     <p>
       Start by constructing a dotplot showing the distribution of home values by <code>Date</code> and <code>State</code>.
     </p>
-    <pre class="r"><code>home_plot <- ggplot(housing, aes(y = State, x = Home.Price.Index)) + 
-      geom_point(aes(color = Date), 
-        alpha = 0.3,
-        size = 1.5, 
-        position = position_jitter(width = 0, height = 0.25))</code></pre>
+    <pre class="r"><code>p3 <- ggplot(housing, 
+        aes(x = State, y = Home.Price.Index)) 
+
+    p4 <- p3 + geom_point(aes(color = Date), 
+                          alpha = 0.5,
+                          size = 1.5, 
+                          position = position_jitter(width = 0.25, height = 0))
+
+    p4</code></pre>
     <p>
-      First, we will change the label on the vertical axis.
+      <img src="img/changing-scale-example-0.png" width="100%"/>
     </p>
-    <pre class="r"><code>home_plot <- home_plot + 
-      scale_y_discrete(name = "State Abbreviation")</code></pre>
+    <p>
+      First, we will change the label on the horizontal axis.
+    </p>
+    <pre class="r"><code>p4 <- p4 + 
+      scale_x_discrete(name = "State Abbreviation")
+
+    p4</code></pre>
     <p>
       <img src="img/changing-scale-example-1.png" width="100%"/>
     </p>
     <p>
       Now let’s modify the <code>breaks</code> and <code>labels</code> for the <code>x</code> axis and color scales:
     </p>
-    <pre class="r"><code>home_plot + 
-      scale_color_continuous(breaks = c(1975.25, 1994.25, 2013.25),
-        labels = c(1971, 1994, 2013))</code></pre>
+    <pre class="r"><code>p4 <- p4 + 
+      scale_color_continuous(name = "",
+        breaks = c(1975.25, 1994.25, 2013.25),
+        labels = c(1971, 1994, 2013))
+    p4</code></pre>
     <p>
-      <img src="img/changing-scale-example-1.png" width="100%"/>
+      <img src="img/changing-scale-example-2.png" width="100%"/>
     </p>
     <p>
       Next change the low and high values to <code>blue</code> and <code>red</code>:
     </p>
-    <pre class="r"><code>home_plot <- home_plot + 
+    <pre class="r"><code>p4 <- p4 + 
       scale_color_continuous(breaks = c(1975.25, 1994.25, 2013.25),
         labels = c(1971, 1994, 2013),
         low = "blue", high = "red")
-      home_plot</code></pre>
+    p4</code></pre>
     <p>
       <img src="img/changing-color-example-1.png" width="100%"/>
     </p>
@@ -372,7 +386,7 @@
     <p>
       <code>ggplot2</code> has a wide variety of color <code>scales</code>; here is an example using <code>scale_color_gradient2</code> to interpolate between three different colors:
     </p>
-    <pre class="r"><code>home_plot + 
+    <pre class="r"><code>p4 + 
       scale_color_gradient2(breks = c(1975.25, 1994.25, 2013.25),
         labels = c(1971, 1994, 2013),
         low = "blue",
@@ -382,25 +396,6 @@
     <p>
       <img src="img/color-scale-midpoint-example-1.png" width="100%"/>
     </p>
-    <blockquote>
-      <p>
-        Since a home price index of 1 is an important benchmark, it is worth highlighting as contextual reference in our plot. Use <code>geom_vline()</code> to add a dotted, black, vertical line to the plot we created above.
-      </p>
-    </blockquote>
-    <pre class="r"><code># sample solution
-    home_plot + 
-      geom_vline(aes(xintercept = 1), linetype = 3, color = "black") + 
-      scale_color_gradient2(breaks = c(1975.25, 1994.25, 2013.25),
-                        labels = c(1971, 1994, 2013),
-                        low = "blue",
-                        high = "red",
-                        mid = "gray60",
-                        midpoint = 1994.25)</code></pre>
-    <blockquote>
-      <p>
-        Recall that layers in <code>ggplot2</code> are added sequentially. How would you put the dotted vertical line you created in the previous exercise <em>behind</em> the data values?
-      </p>
-    </blockquote>
     
     <h4 class="w3-text-grey">Available Scales</h4>
     <p>
@@ -519,9 +514,10 @@
     <p>
       Let’s start by using a technique we already know: map <code>State</code> to <code>color</code>:
     </p>
-    <pre class="r"><code>state_plot <- ggplot(housing, aes(x = Date, y = Home.Value))
+    <pre class="r"><code>p5 <- ggplot(housing, aes(x = Date, 
+                                                   y = Home.Value))
 
-    state_plot + 
+    p5 + 
       geom_line(aes(color = State))</code></pre>
     <p>
       <img src="img/line-plot-example-1.png" width="100%"/>
@@ -534,7 +530,7 @@
     <p>
       We can fix the previous plot by faceting by <code>State</code> rather than mapping <code>State</code> to <code>color</code>:
     </p>
-    <pre class="r"><code>state_plot + 
+    <pre class="r"><code>p5 + 
       geom_line() +
       facet_wrap(~State, ncol = 10)</code></pre>
     <p>
@@ -543,17 +539,96 @@
     <p>
       There is also a <code>facet_grid()</code> function for faceting in two dimensions.
     </p>
+  
+  </div>
+</div>
+
+<div class="w3-row w3-padding-0">
+  <div class="w3-twothird w3-container w3-margin-top">
+
+    <h3 class="w3-text-grey">Remember Tidy Data?</h3>
+
+    <h4 class="w3-text-grey">Map 2 (or more) Different Columns to one Aesthetic</h4>
+    <p>
+      A common question from <code>ggplot</code> beginners goes something like this: <strong>I have two variables in my dataframe, and I'd like to plot them as separate points, with different colors depending on which variable it is. How do I do that?</strong>
+    </p>
+
+    <h4 class="w3-text-grey">First try: draw two separate lines</h4>
+    <pre class="r"><code>housing_byyear <- aggregate(cbind(Home.Value, Land.Value) ~ Date, data = housing, mean)
+
+    ggplot(housing_byyear, aes(x=Date)) +
+      geom_line(aes(y = Home.Value), color="red") +
+      geom_line(aes(y = Land.Value), color="blue")</code></pre>
+    <p>
+      This works but it is not so great, because if I later add another dimension, I'll have to remember that I hard-coded these lines separately. Plus because I didn't use an <code>aes()</code> mapping, I don't get a legend. Wah wah.
+    </p>
+
+    <h4 class="w3-text-grey">Second try: a tidier way</h4>
+    <p>
+      First we'll <code>pivot_longer</code> the values we want to plot:
+    </p>
+    <pre class="r"><code>library(tidyr)
+    home_land_byyear <- pivot_longer(housing_byyear,
+                                values_to = "value",
+                                names_to = "type",
+                                cols = c("Home.Value", "Land.Value"))</code></pre>
+    <p>
+      Then we'll plot them:
+    </p>
+    <pre class="r"><code>ggplot(home_land_byyear,
+            aes(x = Date,
+                y = value,
+                color = type)) +
+      geom_line()</code></pre>
+    <p>
+      Much cleaner! 
+    </p>
+  </div>
+</div>
+
+<div class="w3-row w3-padding-0">
+  <div class="w3-twothird w3-container w3-margin-top">
+
+    <h3 class="w3-text-grey">Your turn!</h3>
+    <p>
+      Now let's try building a few visualizations of your own. Try answering these questions using the <code>housing</code> dataset we've been using so far.
+    </p>
+    <blockquote>
+      <p>
+        Create a scatterplot of the value of each home in the first quarter of 2013 as a function of the value of the land.
+      </p>
+    </blockquote>
+
+    <blockquote>
+      <p>
+        Store the scatterplot that you created in the previous exercise as an object called <code>home_value_plot</code>.
+      </p>
+    </blockquote>
+
+    <blockquote>
+      <p>
+        In your <code>home_value_plot</code>, map color to the cost of the structure and show your scatterplot.
+      </p>
+    </blockquote>
+
+    <blockquote>
+      <p>
+        Let's return to p4. Since a home price index of 1 is an important benchmark, it is worth highlighting as contextual reference in our plot. Use <code>geom_vline()</code> to add a dotted, black, vertical line to p4.
+      </p>
+    </blockquote>
+  
+    <blockquote>
+      <p>
+        Recall that layers in <code>ggplot2</code> are added sequentially. How would you put the dotted vertical line you created in the previous exercise <em>behind</em> the data values?
+      </p>
+    </blockquote>
+
     <blockquote>
       <p>
         Use a <code>facet_wrap</code> to create a data graphic of your choice that illustrates something interesting about home prices.
       </p>
     </blockquote>
-    <pre class="r"><code># sample solution
-    ggplot(housing, aes(x = Date, y = Home.Price.Index, color = State)) + 
-      geom_hline(aes(yintercept = 1), linetype = 3, color = "black") + 
-      geom_point(alpha = 0.1) +
-      geom_line() + 
-      facet_wrap(~region)</code></pre>
+
   </div>
 </div>
 

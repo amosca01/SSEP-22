@@ -32,7 +32,9 @@ babynames %>%
   select(year)
 ```
 
-But we might want to do this for many names, and it would be tedious to have to re-type -- or even just re-run -- the same code over and over again. An elegant solution is to write a function. For example, here we write a function called `most_popular_year()` that will return the year in which a specific name was most popular. 
+But what if I asked you to do this for each of your classmates' names? Or for the names of everyone in your high school, your town, or your state? It would be tedious to have to re-type -- or even just re-run -- the same code over and over again. This is where functions come in. Functions allow us to package up code we want to run repeatedly into one command.  
+
+An elegant solution for repeating actions is to write a function. For example, here we write a function called `most_popular_year()` that will return the year in which a specific name was most popular. 
 
 ```{r}
 most_popular_year <- function(name_arg) {
@@ -84,6 +86,7 @@ The way that we have defined `most_popular_year()`, there is no default value fo
 ```{r}
 most_popular_year()
 ```
+
 In this case, this is probably the desired behavior, since it doesn't make sense to call this function without specifying a name. However, we could have defined it with a default value, say `"Logan"`. 
 
 ```{r}
@@ -104,7 +107,7 @@ Now we can call the function without specifying the `name_arg` argument, but if 
 most_popular_year_with_default()
 ```
 
-We can still of course still override the default value of `name_arg`:
+We can still of course override the default value of `name_arg`:
 
 ```{r}
 most_popular_year_with_default(name_arg = "Jordan")
@@ -112,7 +115,7 @@ most_popular_year_with_default(name_arg = "Jordan")
 
 ## Scoping
 
-How did our function know about the `babynames` table? Why wasn't that an input to the function? The answer to the first question involes the notion of [variable scoping](http://adv-r.had.co.nz/Functions.html#lexical-scoping), while the answer to the second question is a design choice. 
+How did our function know about the `babynames` table? Why wasn't that an input to the function? The answer to the first question involves the notion of [variable scoping](http://adv-r.had.co.nz/Functions.html#lexical-scoping), while the answer to the second question is a design choice. 
 
 The rules for variable scoping in R are...complicated. But what is important for you to understand is that R will look for objects in the global environment if it can't find them locally. So when we run `most_popular_year()`, R will look for a data frame called `babynames` in the global environment. If it exists, then the function should work, but if not, it won't. Thus, whether a user-defined function in R works as expected depends on what is in the global environment. This behavior is different than most compiled programming languages (e.g. C++, Java, etc.), but it is designed to make it easy to script with functions on-the-fly. 
 
@@ -148,16 +151,16 @@ most_popular_year_v2(name_arg = "Logan")
 most_popular_year_v2(data = babynames, name_arg = "Logan")
 ```
 
-This also enables us to apply our function to subsets of the original data. So we can search for the most popular year for `Logan` among boys and girls separately. 
+This also enables us to apply our function to subsets of the original data. So we can search for the most popular year for `Scout` among boys and girls separately. 
 
 ```{r}
 babynames %>%
   filter(sex == "F") %>%
-  most_popular_year_v2(name_arg = "Logan")
+  most_popular_year_v2(name_arg = "Scout")
 
 babynames %>%
   filter(sex == "M") %>%
-  most_popular_year_v2(name_arg = "Logan")
+  most_popular_year_v2(name_arg = "Scout")
 ```
 
 Yay, tidy functions!
@@ -206,29 +209,29 @@ most_popular_year(name_arg = "Curly")
 
 ### `map()`
 
-But what if we had a long list of names? We wouldn't want to have to copy and paste that code repeatedly. The solution is to create a vector that contains the names we're interested in, and then use the `map()` function to apply the function to each item in the vector. To read more about this function, type `?map` at the console.
+But what if we had a long list of names? We wouldn't want to have to copy and paste the function call repeatedly. The solution is to create a vector that contains the names we're interested in, and then use the `map()` function to apply our function to each item in the vector. To read more about this function, type `?map` at the console.
 
 > Note: many other programming languages have a similar operation [`map()`](https://en.wikipedia.org/wiki/Map_(higher-order_function)). 
 
-For example, the people in Jordan's family have the following names:
+For example, Ab's friends have the following names:
 
 ```{r}
-jordans_family <- c("Jordan", "Morganne", "Logan", "Charlie")
+abs_family <- c("Jordan", "Kaden", "Kylee", "Felix")
 ```
 
 In order to call the `most_popular_year()` function on each of those names, we can write:
 
 ```{r}
-map(jordans_family, most_popular_year)
+map(abs_family, most_popular_year)
 ```
 
 The `map()` function will always return a `list` -- a data structure that we have not talked about much. In order to flatten the list, we need to use one of the `map_*()` functions that specifies the return data type. In this case, since `most_popular_year()` returns a `data.frame`, we use the `map_df()` function. 
 
 ```{r}
-map_df(jordans_family, most_popular_year)
+map_df(abs_family, most_popular_year)
 ```
 
-### A note on `for` loops
+### A note on `for` loops (if you're familiar with them)
 
 Logically, using `map()` is very much like using a `for` loop. `for` loops are perfectly acceptable in R, but are not part of the *en vogue* R coding style. Additionally there are situations in which `for` loops are less efficient than `map()`. 
 
