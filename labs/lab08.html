@@ -18,7 +18,7 @@
       Let’s take a look:
     </p>
     <pre class="r"><code>library(tidyverse)
-    glimpse(ToothGrowth)</code></pre>
+glimpse(ToothGrowth)</code></pre>
     <pre><code>## Rows: 60
     ## Columns: 3
     ## $ len  &lt;dbl&gt; 4.2, 11.5, 7.3, 5.8, 6.4, 10.0, 11.2, 11.2, 5.2, 7.0, 16.5, 16.5…
@@ -66,9 +66,14 @@
         Make a boxplot of the <code>ToothGrowth</code> data, with <code>x = dose</code>, <code>y = len</code>, and <code>fill = dose</code>.<br/> Store it in a variable called <code>my_plot</code>.
       </p>
     </blockquote>
-    <pre class="r"><code># sample solution
-    my_plot <- ggplot(ToothGrowth, aes(x = dose, y = len, fill = dose)) + 
-      geom_boxplot()</code></pre>
+    <pre class="r"><code># sample solution 
+my_plot <- ggplot(ToothGrowth, 
+                  aes(x = dose, 
+                  y = len, 
+                  fill = dose)) + 
+  geom_boxplot()
+
+my_plot</code></pre>
   </div>
 </div>
 
@@ -92,10 +97,10 @@
 
     <h3 class="w3-text-grey">Changing colors with <code>RColorBrewer</code></h3>
     <p>
-      That looks pretty nice, but we could spend an awful lot of time making tiny tweaks to color palettes. Luckily Cynthia Brewer over at <a href="http://colorbrewer2.org">ColorBrewer</a> has come up with some really good ones we can borrow! Let’s load the <code>RColorBrewer</code> library and check it out. <strong>Note:</strong> you might need to <code>install.packages('RColorBrewer')</code> if you’re running <code>R</code> on your laptop.
+      That looks pretty nice, but we could spend an awful lot of time making tiny tweaks to color palettes by hand. Luckily Cynthia Brewer over at <a href="http://colorbrewer2.org">ColorBrewer</a> has come up with some really good ones we can borrow! Let’s load the <code>RColorBrewer</code> library and check it out. <strong>Note:</strong> you might need to <code>install.packages('RColorBrewer')</code> if you’re running <code>R</code> on your laptop.
     </p>
-    <pre class="r"><code class="sourceCode r">library(RColorBrewer)
-    display.brewer.all()</code></pre>
+    <pre class="r"><code>library(RColorBrewer)
+display.brewer.all()</code></pre>
     <p>
       <img src="img/unnamed-chunk-5-1.png" width="100%"/>
     </p>
@@ -119,33 +124,30 @@
       </p>
     </blockquote>
     <pre class="r"><code># sample solution
-    my_plot + 
-      scale_fill_brewer(palette = "Dark2")</code></pre>
+my_plot + 
+  scale_fill_brewer(palette = "Dark2")</code></pre>
     <p>
       <img src="img/unnamed-chunk-7-1.png" width="100%"/>
     </p>
-    <blockquote>
-      <p>
-        Install the <code>nasaweather</code> package, and load it.
-      </p>
-    </blockquote>
-    <pre class="r"><code># sample solution
-    install.packages("nasaweather")
-    library(nasaweather)</code></pre>
+    <p>
+      Let's try another. Install the <code>nasaweather</code> package, and load it.
+    </p>
+    <pre class="r"><code>install.packages("nasaweather")
+library(nasaweather)</code></pre>
     <p>
       To make the plot easier to read, we will first filter the <code>storms</code> data frame to include only storms from 1995.
     </p>
     <pre class="r"><code>my_storms <- storms %>%
     filter(year == 1995)</code></pre>
-    <blockquote>
-      <p>
-        Plot the storms in <code>my_storms</code>, mapping horizontal position to longitude, vertical position to latitude, and color to wind speed. Also use a <code>facet_wrap()</code> to make small multiples according to the <code>name</code> of each storm.
-      </p>
-    </blockquote>
-    <pre class="r"><code># sample solution
-    ggplot(my_storms, aes(x = long, y = lat, color = wind)) + 
-      geom_point() + 
-      facet_wrap(~name)</code></pre>
+    <p>
+      Now, let's plot the storms in <code>my_storms</code>, mapping x to longitude, y to latitude, and color to wind speed. We'll also use a <code>facet_wrap()</code> to make small multiples according to the <code>name</code> of each storm.
+    </p>
+    <pre class="r"><code>ggplot(my_storms, 
+      aes(x = long, 
+          y = lat, 
+          color = wind)) + 
+  geom_point() + 
+  facet_wrap(~name)</code></pre>
     <p>
       <img src="img/unnamed-chunk-10-1.png" width="100%"/>
     </p>
@@ -162,12 +164,12 @@
 
     <h3 class="w3-text-grey">Stylizing using <code>ggthemes</code></h3>
     <p>
-      If we want even more control, we can use the <code>ggthemes</code> package to define not only the color palette, but the overall style of the plot as well. For example, if we want the minic the style used by the graphic design team at <a href="http://www.economist.com">The Economist</a>, we could say:
+      If we want even more control, we can use the <code>ggthemes</code> package to define not only the color palette, but the overall style of the plot as well. For example, if we want the mimic the style used by the graphic design team at <a href="http://www.economist.com">The Economist</a>, we could say:
     </p>
     <pre class="r"><code>library(ggthemes)
-    my_plot + 
-      theme_economist() + 
-      scale_fill_economist()</code></pre>
+my_plot + 
+  theme_economist() + 
+  scale_fill_economist()</code></pre>
     <p>
       <img src="img/unnamed-chunk-11-1.png" width="100%"/>
     </p>

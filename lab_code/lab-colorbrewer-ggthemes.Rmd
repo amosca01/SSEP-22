@@ -9,19 +9,17 @@ knitr::opts_chunk$set(eval = TRUE, message = FALSE)
 ### Setting up
 For this lab, we're going to be using the `ToothGrowth` dataset, which is one of the example datasets included in `R`. It contains data on how fast guinea pigs' teeth grow if you give them vitamin C supplements in various forms and at various doses. You can learn more about this dataset by typing `?ToothGrowth` at the console.
 
-![](gfx/guinea-pigs.jpg)
-
 Let's take a look:
 
-```{r load-ggplot2-lib}
-head(ToothGrowth)
+```{r}
+library(tidyverse)
+glimpse(ToothGrowth)
 summary(ToothGrowth)
 ```
 
 Hmm... the `dose` column looks a little funny. There are only three doseage values `[0.5,1,2]`, but `R` is interpreting them as continuous. We can tell `R` that we want to convert them to categories (a.k.a. `factors`) using `dplyr` like this:
 
 ```{r}
-library(dplyr)
 ToothGrowth <- ToothGrowth %>%
   mutate(dose = factor(dose))
 ```
@@ -36,7 +34,7 @@ Much better! Now let's draw a graph.
 ## Drawing a `ggplot`
 Remember the basic recipe for building a plot with `ggplot2`? Don't forget to load the library!
 
-1. Make a boxplot of the `ToothGrowth` data, with `x = dose`, `y = len`, and `fill = dose`.<br/> Store it in a variable called `myPlot`.
+1. Make a boxplot of the `ToothGrowth` data, with `x = dose`, `y = len`, and `fill = dose`. Store it in a variable called `myPlot`.
 
 ```{r}
 
@@ -46,26 +44,27 @@ Remember the basic recipe for building a plot with `ggplot2`? Don't forget to lo
 
 
 ```{r, include=FALSE}
-#-----------------------------------
-# Included for testing purposes only
-#-----------------------------------
-library(ggplot2)
-myPlot <- ggplot(ToothGrowth, 
+# sample solution 
+
+my_plot <- ggplot(ToothGrowth, 
                  aes(x = dose, 
                      y = len, 
-                     fill = dose)) +
+                     fill = dose)) + 
   geom_boxplot()
+
+my_plot
 ```
 
 ## Changing colors manually
 The default colors `R` selects are okay, but maybe we can do better. Let's try using colors from the Smith College official [Color Palette](https://www.smith.edu/about-smith/interactive-style-guide/color-palette). We can specify the color values we want using `scale_fill_manual()` like this:
 
 ```{r}
-myPlot + scale_fill_manual(values = c("#004f71", "#465a01", "#981d97"))
+my_plot + 
+  scale_fill_manual(values = c("#004f71", "#465a01", "#981d97"))
 ```
 
 ## Changing colors with `RColorBrewer`
-That looks pretty nice, but we could spend an awful lot of time making tiny tweaks to color palettes. Luckily Cynthia Brewer over at [ColorBrewer](http://colorbrewer2.org) has come up with some really good ones we can borrow! Let's load the `RColorBrewer` library and check it out. **Note:** you might need to `install.packages('RColorBrewer')` if you're running `R` on your laptop.
+That looks pretty nice, but we could spend an awful lot of time making tiny tweaks to color palettes by hand. Luckily Cynthia Brewer over at [ColorBrewer](http://colorbrewer2.org) has come up with some really good ones we can borrow! Let's load the `RColorBrewer` library and check it out. **Note:** you might need to `install.packages('RColorBrewer')` if you're running `R` on your laptop.
 
 ```{r}
 library(RColorBrewer)
@@ -75,24 +74,57 @@ display.brewer.all()
 Ooh, so many choices! We can now use these `palettes` along with `scale_fill_brewer()` to make perceptually-optimized plots:
 
 ```{r}
-myPlot + scale_fill_brewer(palette = "Set3")
+my_plot + 
+  scale_fill_brewer(palette = "Set3")
 ```
 
 That looks a little bit... Valentine-y?
-
-<img src="gfx/hearts.jpg" width=50% />
 
 2. Try out a few other color palettes!
 ```{r}
 # Put your code here
 ```
 
+```{r}
+# sample solution
+my_plot +
+  scale_fill_brewer(palette = "Dark2")
+```
+Let's try another. Install the `nasaweather` package, and load it.
+    
+```{r}
+install.packages("nasaweather")
+library(nasaweather)
+```
+
+To make the plot easier to read, we will first filter the `storms` data frame to include only storms from 1995.
+
+```{r}
+my_storms <- storms %>%
+    filter(year == 1995)
+```
+
+Now, let's plot the storms in `my_storms`, mapping x to longitude, y to latitude, and color to wind speed. We'll also use a `facet_wrap()` to make small multiples according to the `name` of each storm.
+
+```{r}
+ggplot(my_storms, 
+      aes(x = long, 
+          y = lat, 
+          color = wind)) + 
+  geom_point() + 
+  facet_wrap(~name)
+```
+
+3. Do you think a sequential or diverging color scheme is most appropriate for wind speed? Justify your answer.
+
 ## Stylizing using `ggthemes`
-If we want even more control, we can use the `ggthemes` package to define not only the color palette, but the overall style of the plot as well. For example, if we want the minic the style used by the graphic design team at  [The Economist](http://www.economist.com), we could say:
+If we want even more control, we can use the `ggthemes` package to define not only the color palette, but the overall style of the plot as well. For example, if we want the mimic the style used by the graphic design team at  [The Economist](http://www.economist.com), we could say:
 
 ```{r}
 library(ggthemes)
-myPlot + theme_economist() + scale_fill_economist()
+my_plot + 
+  theme_economist() + 
+  scale_fill_economist()
 ```
 
 Notice how the background changed colors, the axes were re-styled, and the legend changed positions? You can read more about available `ggthemes` and `scales` [here](https://cran.r-project.org/web/packages/ggthemes/vignettes/ggthemes.html).
@@ -106,7 +138,7 @@ data()
 
 You can learn more about any of the datasets by running `?<dataset>` at the console (replacing `<dataset>` with the name of the dataset).
 
-3. Use `ggplot` to draw a plot of any dataset you like, and style it.<br/> Try combining both a theme and a color palette.
+4. Use `ggplot` to draw a plot of any dataset you like, and style it.<br/> Try combining both a theme and a color palette.
 ```{r}
 # Put your code here
 ```
