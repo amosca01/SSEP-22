@@ -1,0 +1,34 @@
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+In this lab, we will look at the entire analysis pipeline, from question generation to interpreting analysis results. 
+
+```{r, message=FALSE}
+library(tidyverse)
+library(babynames)
+```
+
+**Goal**: by the end of this lab, you will be able to scope and perform your own analysis. 
+
+## Setup
+
+In the `babynames` package, there is a table called `births`. It has just two columns:
+
+```{r}
+head(births)
+```
+
+
+## Your turn!
+Now let's try joining some tabvles from a dataset of your choosing. Don't have one? Try answering these questions using the `nycflights13` package.
+
+#. Compute the average arrival delay time for each carrier, and include the full name of the carrier in your result set.
+
+#. What was the full name of the airport that was the most common destination from NYC in 2013? 
+
+#. What is the most commonly used plane? Find its manufacturer and model.
+
+#. Were there any flights that went to "mystery" airports (i.e., airports that don't appear in the `airports` table)? 
+
+#. Were there any "mystery" planes (i.e., planes that don't appear in the `planes` table)? 
