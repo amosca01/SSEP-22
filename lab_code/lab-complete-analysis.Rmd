@@ -226,9 +226,9 @@ I'm going to choose the Age at 1st marriage and GDP per capita datasets, but you
 
 First thing's first: let's go through the same steps as earlier to take a look at our datasets. Since we already have a question in mind, we can skip "Step 3: Start asking questions".
 
-### Dataset 3: Age at 1st marriage (women)
+## Dataset 3: Age at 1st marriage (women)
 
-#### Step 1: Read the description
+### Step 1: Read the description
  
 Description from gapminder: "The mean age, in years, of first marriage for women. Women who never married are excluded. Cohabitation is excluded. The data are based on multiple sources and definitions may vary."
 
@@ -236,7 +236,7 @@ What critical questions can you askk of this dataset?
 
 Let's take a look at it! 
 
-#### Step 2: Load and look at the data
+### Step 2: Load and look at the data
 
 ```{r}
 marriage <- read_csv("https://amosca01.github.io/SSEP-22/data/age_at_1st_marriage_women.csv")
@@ -271,23 +271,23 @@ summary(marriage)
 
 Looking at the summary, there are 36 total years and 34 NA's. One of the problems with our earlier dataset was also that there weren't enough years to make a good assessment.
 
-#### Conclusions
+### Conclusions
 
 Sometimes a dataset doesn't work out -- and that's okay! Part of being a data scientist is knowing when to move on. We do this exploratory work because *not every dataset is perfect for our analysis*, and we want to figure that out early on, before we get invested in the data.
 
 Let's move on now to another dataset that could address one of our other hypotheses. 
 
-### Dataset 4: GDP/capita (US$, inflation-adjusted)
+## Dataset 4: GDP/capita (US$, inflation-adjusted)
 
-#### Description
+### Step 1: Read the description
 
 "GDP per capita is gross domestic product divided by midyear population. GDP is the sum of gross value added by all resident producers in the economy plus any product taxes and minus any subsidies not included in the value of the products. It is calculated without making deductions for depreciation of fabricated assets or for depletion and degradation of natural resources. Data are in constant 2010 U.S. dollars."
 
-Wow! That's a lot, and might be confusing. Here's my short version: GDP per capita can be a good indicator of the economic situation of a country, since it measures the country's wealth per person. {r}[Here's](https://en.wikipedia.org/wiki/List_of_countries_by_GDP_(PPP)_per_capita) the wikipedia page on the topic if you want to read more.
+Wow! That's a lot, and might be confusing. Here's my short version: GDP per capita can be a good indicator of the economic situation of a country, since it measures the country's wealth per person. [Here's](https://en.wikipedia.org/wiki/List_of_countries_by_GDP_(PPP)_per_capita) the wikipedia page on the topic if you want to read more.
 
 What critical questions can you ask of this dataset? 
 
-#### Step 1: Load and look at the data
+### Step 2: Load and look at the data
 
 ```{r}
 gdp <- read_csv("https://amosca01.github.io/SSEP-22/data/gdppercapita_us_inflation_adjusted.csv")
@@ -318,7 +318,7 @@ gdp %>%
 
 Okay! It looks like the values for GDP start in 2001 and go until 2019, which gives us 19 years of data to work with. It's not as much as we might have hoped for, but let's move on.
 
-## Combining datasets
+### Combining datasets
 
 Do you remember how to join data? Take a moment to look up a refresher if needed.
 
@@ -339,7 +339,7 @@ head(afghanistan)
 
 This leaves us with data from 2002 to 2019, since the gender ratio data from 2001 was NA. 
 
-Nowy, we can look at whether Afghanistan's GDP may be related to its school gender ratio.
+Now, we can look at whether Afghanistan's GDP may be related to its school gender ratio.
 
 Note that we can't yet say that GDP *caused* the gender ratio -- to do that, we need to use statistics to prove that one caused the other. You might know the phrase: "Correlation, not causation."
 

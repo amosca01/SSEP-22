@@ -25,10 +25,10 @@ library(ggplot2)</code></pre>
       Part of what exploratory data analysis is to look through several different datasets, begin to formulate big-picture questions, and see if or how we can answer those questions using the datasets.
     </p>
     <p>
-      All of the following data is from <a href="https://www.gapminder.org/data/">gapminder.org</a>, which you also saw in Lab 5. Feel free to try out this process on your own with different data, either from the same site or another source!
+      All of the following data is from <a href="https://www.gapminder.org/data/" target="_blank">gapminder.org</a>, which you also saw in Lab 5. Feel free to try out this process on your own with different data, either from the same site or another source!
     </p>
     <p>
-      Often, before we start working with a specific dataset, we have a big, high-level question or topic we are interested in. Let's start this lab by saying <em>we want to make comparisons about countries<em>. The following parts of this lab start to investigate this high-level topic with different datasets. 
+      Often, before we start working with a specific dataset, we have a big, high-level question or topic we are interested in. Let's start this lab by saying <em>we want to make comparisons about countries</em>. The following parts of this lab start to investigate this high-level topic with different datasets. 
     </p>
     
     <h4 class="w3-text-grey">Dataset 1: Proportion of people who disagree that vaccines are effective</h4>
@@ -37,8 +37,709 @@ library(ggplot2)</code></pre>
     <p>
       The Gapminder description of these data is that "This is the proportion of people who <strong>disagree</strong> that vaccines are effective for children to have." 
     </p>
+    <p>
+      I added the emphasis, because it’s important to be clear what the statement is saying. Note that the rest of the population might not agree that vaccines are effective for children to have, because they could be undecided on the question. We don’t know!
+    </p>
+    <blockquote>
+      <p>
+        What other critical questions can you ask about this dataset?
+      </p>
+    </blockquote>
 
+    <h5 class="w3-text-grey">Step 2: Load and look at the data!</h5>
+    <pre class="r"><code>vaccine <- read_csv("https://amosca01.github.io/SSEP-22/data/vccin_effect_dag.csv")</code></pre>
+    <pre><code>## Rows: 146 Columns: 5
+    ## ── Column specification ────────────────────────────────────────────────────────
+## Delimiter: ","
+## chr (1): country
+## dbl (2): 2014, 2017
+## lgl (2): 2015, 2016
+## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+    <pre class="r"><code>head(vaccine)</code></pre>
+    <pre><code>## # A tibble: 6 x 5
+##   country              `2014` `2015` `2016` `2017`
+##   <chr>                 <dbl> <lgl>  <lgl>   <dbl>
+## 1 Afghanistan             5.8 NA     NA        1.8
+## 2 Albania                NA   NA     NA        9  
+## 3 United Arab Emirates   NA   NA     NA        3.4
+## 4 Argentina               1.3 NA     NA        2.9
+## 5 Armenia                13.9 NA     NA       12.5
+## 6 Australia               4.3 NA     NA        4.1</code></pre>
+    <p>
+      Right away, take a moment to notice that this isn’t tidy data. When we want to analyze or graph it, we’ll need to <code>pivot_wider()</code> first.
+    </p>
+    <blockquote>
+      <p>
+        Can you explain why this isn’t tidy and why we need to pivot?
+      </p>
+    </blockquote>
+    <p> 
+      Also, I notice something odd… looking at the data, there are columns for every year from 2014 to 2017, but so far I only see <code>NA</code> values for 2015 and 2016. We might have a better idea of the data if we used <code>summary()</code>.
+    </p>
+    <pre class="r"><code>summary(vaccine)</code></pre>
+      <pre><code>##    country               2014          2015           2016        
+    ##  Length:146         Min.   : 0.000   Mode:logical   Mode:logical  
+    ##  Class :character   1st Qu.: 5.100   NA's:146       NA's:146      
+    ##  Mode  :character   Median : 7.900                                
+    ##                     Mean   : 8.687                                
+    ##                     3rd Qu.:11.650                                
+    ##                     Max.   :26.000                                
+    ##                     NA's   :78                                    
+    ##       2017       
+    ##  Min.   : 0.400  
+    ##  1st Qu.: 3.200  
+    ##  Median : 5.200  
+    ##  Mean   : 5.853  
+    ##  3rd Qu.: 7.700  
+    ##  Max.   :27.600  
+    ##  NA's   :4</code></pre>
 
+    <p>
+      Okay! The summary gives us more information. Here are my immediate thoughts:
+      <ul>
+        <li>
+          Both 2015 and 2016 say <code>Mode:logical, NA’s:146</code>. This means that there is no data for 2015 or 2016. In other words, we only have real data for 2014 and 2017.
+        </li>
+        <li>
+          Both 2014 and 2017 have some NA values, but there are more <code>NA</code>’s in 2014 (78) than 2017 (4).
+        </li>
+        <li>
+          I’m noticing in 2014 there was a global minimum of 0% disagreement in vaccine efficacy but in 2017 there was a minimum 0.4% disagreement. Similarly, the maximum disagreement rose from 26% to 27.6%. I wonder if that means that global disagreement rose from 2014 to 2017, or if that was just one or two outliers skewing the data.
+        </li>
+        <li>
+          Now that I’m thinking about outliers, I notice that the 3rd quartile of 2017 is 7.7%, while the maximum value is 27.6%. I wonder if that means that the majority of countries have little disagreement with vaccine efficacy, but only a few (or even only one or two) countries disagree very strongly.
+        </li>
+      </ul>
+    </p>
+    <blockquote>
+      <p>
+        Can you make any more observations – or even think of some more questions – based on what we see in the data so far? Once you’re done, move on to the next step!
+      </p>
+    </blockquote>
+
+    <h5 class="w3-text-grey">Step 3: Start asking questions</h5>
+    <p>
+      I see two possible routes we could go with this data (remember, we’re interested making comparisons about countries).
+    </p>
+    <p>
+      With this data we could compare how many people disagree with vaccine efficacy across different countries (e.g., how many people disagree with vaccine efficacy in Afghanistan versus Albania), and/or how many people disagree with vaccine efficacy in the same country over time (e.g. in Afghanistan in 2014 vs. Afghanistan in 2017).
+    </p>
+    <p>
+      Remember we noticed that we only have two years of data, so maybe asking “how did one country change over time” isn’t so interesting in this case. Let’s check with a quick scatterplot of Afghanistan’s change in vaccine disagreement.
+    </p>
+    <pre class="r"><code>vaccine %>% 
+    filter(country == "Afghanistan") %>% 
+    pivot_longer(cols = -country,
+                 names_to = "year", 
+                 values_to = "disagreement") %>% 
+    ggplot(aes(x = year, y = disagreement)) +
+    geom_point()</code></pre>
+    <p>
+      <img src="img/afghanistan-disagreement.png" width="100%"/>
+    </p>
+    <p>
+      It looks like disagreement with vaccine efficacy went down in Afghanistan between 2014 and 2017, but that’s a pretty boring graph, huh?
+    </p>
+    <p>
+      Maybe you can come up with some more interesting questions to explore! Look at the data some more and make a couple graphs.
+    </p>
+    <p>
+      As for me, I’m not so interested in this dataset: there aren’t very many questions we could explore, since there is so little data to work with. <strong>In the early stages of an investigation, it can be important to look through multiple datasets until you find one you want to work with!</strong>
+    </p>
+
+    <h4 class="w3-text-grey">Dataset 2: Ratio girls/boys in school, primary and secondary education (%)</h4>
+
+    <h5 class="w3-text-grey">Step 1: Read the description</h5>
+    <p>
+      This dataset’s description is “Gender parity index for gross enrollment ratio in primary and secondary education is the ratio of girls to boys enrolled at primary and secondary levels in public and private schools.”
+    </p>
+    <p>
+      I don’t know about you, but I’m grateful that they defined “gender parity index for gross enrollment ratio…” – that’s a complicated phrase!
+    </p>
+    <p>
+      Taking a guess, since the ratio is of girls:boys, I would want (in an ideal world) the number for each country to be as close to 1 as possible. That would mean an equal number of girls and boys are receiving an education and are not hindered by sexism.
+    </p>
+    <p>
+      However, knowing the state of the world, I expect that many numbers are going to be less than 1 (or even approaching 0), since in many cases fewer girls get to go to school than boys.
+    </p>
+    <blockquote>
+      <p>
+        What other critical questions can you ask about this dataset? 
+      </p>
+    </blockquote>
+
+    <h5 class="w3-text-grey">Step 2: Load and look at the data!</h5>
+    <p>
+      Usually, after loading the data, this means using <code>glimpse()</code> or <code>head()</code> to get an idea of what the columns and rows look like and then using <code>summary()</code> to get a basic idea of the spread of the data.
+    </p>
+    <pre class="r"><code>school <- read_csv("https://amosca01.github.io/SSEP-22/data/ratio_of_girls_to_boys_in_primary_and_secondary_education_perc.csv")</code></pre>
+    <pre><code>## Rows: 204 Columns: 53
+
+## ── Column specification ────────────────────────────────────────────────────────
+## Delimiter: ","
+## chr  (1): country
+## dbl (52): 1969, 1970, 1971, 1972, 1973, 1974, 1975, 1976, 1977, 1978, 1979, ...
+
+## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+    <pre class="r"><code>head(school)</code></pre>
+    <pre><code>## # A tibble: 6 x 53
+##   country  `1969` `1970` `1971` `1972` `1973` `1974` `1975` `1976` `1977` `1978`
+##   <chr>     <dbl>  <dbl>  <dbl>  <dbl>  <dbl>  <dbl>  <dbl>  <dbl>  <dbl>  <dbl>
+## 1 Aruba    NA     NA     NA     NA     NA     NA     NA     NA     NA     NA    
+## 2 Afghani…  0.167  0.161  0.161  0.169  0.167  0.174  0.181  0.192  0.199 NA    
+## 3 Angola   NA      0.64   0.657 NA     NA     NA     NA     NA     NA     NA    
+## 4 Albania  NA     NA     NA     NA     NA     NA      0.923 NA      0.925  0.929
+## 5 Andorra  NA     NA     NA     NA     NA      1.15  NA     NA     NA     NA    
+## 6 United … NA     NA     NA      0.829  0.926  0.934  0.944  1.01   1.05   1.03 
+## # … with 42 more variables: 1979 <dbl>, 1980 <dbl>, 1981 <dbl>, 1982 <dbl>,
+## #   1983 <dbl>, 1984 <dbl>, 1985 <dbl>, 1986 <dbl>, 1987 <dbl>, 1988 <dbl>,
+## #   1989 <dbl>, 1990 <dbl>, 1991 <dbl>, 1992 <dbl>, 1993 <dbl>, 1994 <dbl>,
+## #   1995 <dbl>, 1996 <dbl>, 1997 <dbl>, 1998 <dbl>, 1999 <dbl>, 2000 <dbl>,
+## #   2001 <dbl>, 2002 <dbl>, 2003 <dbl>, 2004 <dbl>, 2005 <dbl>, 2006 <dbl>,
+## #   2007 <dbl>, 2008 <dbl>, 2009 <dbl>, 2010 <dbl>, 2011 <dbl>, 2012 <dbl>,
+## #   2013 <dbl>, 2014 <dbl>, 2015 <dbl>, 2016 <dbl>, 2017 <dbl>, 2018 <dbl>,
+## #   2019 <dbl>, 2020 <dbl></code></pre>
+    <p>
+      So, looking at these data, I notice again that we’re not working with tidy data. That’s good to know for the future!
+    </p>
+    <p>
+      I also notice that the data begins in 1969 and ends in 2020, so we’re covering a much wider time period than the previous dataset did.
+    </p>
+    <blockquote>
+      <p> 
+        What other observations about the data can you make based on the head?
+      </p>
+    </blockquote>
+    <pre class="r"><code>summary(school)</code></pre>
+      <pre><code>##    country               1969             1970             1971       
+    ##  Length:204         Min.   :0.0527   Min.   :0.1610   Min.   :0.1500  
+    ##  Class :character   1st Qu.:0.7850   1st Qu.:0.5790   1st Qu.:0.6245  
+    ##  Mode  :character   Median :0.9240   Median :0.8570   Median :0.9200  
+    ##                     Mean   :0.8463   Mean   :0.7750   Mean   :0.8223  
+    ##                     3rd Qu.:1.0072   3rd Qu.:0.9842   3rd Qu.:0.9945  
+    ##                     Max.   :1.4500   Max.   :1.1100   Max.   :1.4400  
+    ##                     NA's   :170      NA's   :88       NA's   :93      
+    ##       1972             1973             1974             1975       
+    ##  Min.   :0.1690   Min.   :0.1670   Min.   :0.1740   Min.   :0.1810  
+    ##  1st Qu.:0.6550   1st Qu.:0.6570   1st Qu.:0.6735   1st Qu.:0.6670  
+    ##  Median :0.9370   Median :0.9260   Median :0.9390   Median :0.9320  
+    ##  Mean   :0.8374   Mean   :0.8339   Mean   :0.8637   Mean   :0.8525  
+    ##  3rd Qu.:1.0100   3rd Qu.:1.0000   3rd Qu.:1.0100   3rd Qu.:1.0100  
+    ##  Max.   :1.4200   Max.   :1.1800   Max.   :1.4100   Max.   :1.4000  
+    ##  NA's   :96       NA's   :102      NA's   :106      NA's   :99      
+    ##       1976             1977             1978            1979       
+    ##  Min.   :0.1920   Min.   :0.1990   Min.   :0.436   Min.   :0.4350  
+    ##  1st Qu.:0.6930   1st Qu.:0.7070   1st Qu.:0.713   1st Qu.:0.7545  
+    ##  Median :0.9360   Median :0.9290   Median :0.949   Median :0.9670  
+    ##  Mean   :0.8586   Mean   :0.8629   Mean   :0.876   Mean   :0.8822  
+    ##  3rd Qu.:1.0100   3rd Qu.:1.0100   3rd Qu.:1.010   3rd Qu.:1.0100  
+    ##  Max.   :1.4200   Max.   :1.4400   Max.   :1.430   Max.   :1.4100  
+    ##  NA's   :97       NA's   :103      NA's   :105     NA's   :109     
+    ##       1980             1981             1982             1983       
+    ##  Min.   :0.2420   Min.   :0.3730   Min.   :0.3840   Min.   :0.4070  
+    ##  1st Qu.:0.7260   1st Qu.:0.7485   1st Qu.:0.7728   1st Qu.:0.7570  
+    ##  Median :0.9350   Median :0.9600   Median :0.9720   Median :0.9670  
+    ##  Mean   :0.8647   Mean   :0.8828   Mean   :0.8936   Mean   :0.8835  
+    ##  3rd Qu.:1.0100   3rd Qu.:1.0100   3rd Qu.:1.0200   3rd Qu.:1.0200  
+    ##  Max.   :1.3700   Max.   :1.3300   Max.   :1.3100   Max.   :1.2800  
+    ##  NA's   :99       NA's   :105      NA's   :104      NA's   :99      
+    ##       1984            1985             1986             1987       
+    ##  Min.   :0.348   Min.   :0.4240   Min.   :0.3680   Min.   :0.4630  
+    ##  1st Qu.:0.772   1st Qu.:0.7930   1st Qu.:0.7900   1st Qu.:0.7980  
+    ##  Median :0.984   Median :0.9650   Median :0.9900   Median :0.9720  
+    ##  Mean   :0.894   Mean   :0.8973   Mean   :0.9008   Mean   :0.9072  
+    ##  3rd Qu.:1.020   3rd Qu.:1.0100   3rd Qu.:1.0100   3rd Qu.:1.0100  
+    ##  Max.   :1.270   Max.   :1.2500   Max.   :1.2500   Max.   :1.2400  
+    ##  NA's   :103     NA's   :95       NA's   :103      NA's   :103     
+    ##       1988             1989             1990             1991       
+    ##  Min.   :0.3960   Min.   :0.4150   Min.   :0.4290   Min.   :0.5450  
+    ##  1st Qu.:0.8157   1st Qu.:0.8195   1st Qu.:0.9165   1st Qu.:0.8748  
+    ##  Median :0.9810   Median :0.9840   Median :0.9955   Median :0.9940  
+    ##  Mean   :0.9069   Mean   :0.9149   Mean   :0.9386   Mean   :0.9396  
+    ##  3rd Qu.:1.0100   3rd Qu.:1.0200   3rd Qu.:1.0200   3rd Qu.:1.0200  
+    ##  Max.   :1.2300   Max.   :1.2300   Max.   :1.2200   Max.   :1.2000  
+    ##  NA's   :104      NA's   :105      NA's   :104      NA's   :106     
+    ##       1992             1993             1994             1995       
+    ##  Min.   :0.3620   Min.   :0.4320   Min.   :0.4470   Min.   :0.4560  
+    ##  1st Qu.:0.8825   1st Qu.:0.8880   1st Qu.:0.8910   1st Qu.:0.9223  
+    ##  Median :0.9955   Median :0.9900   Median :0.9890   Median :0.9940  
+    ##  Mean   :0.9438   Mean   :0.9346   Mean   :0.9397   Mean   :0.9422  
+    ##  3rd Qu.:1.0300   3rd Qu.:1.0200   3rd Qu.:1.0200   3rd Qu.:1.0200  
+    ##  Max.   :1.1900   Max.   :1.1900   Max.   :1.2000   Max.   :1.1800  
+    ##  NA's   :96       NA's   :104      NA's   :111      NA's   :116     
+    ##       1996             1997             1998             1999       
+    ##  Min.   :0.4860   Min.   :0.5090   Min.   :0.4910   Min.   :0.5620  
+    ##  1st Qu.:0.9225   1st Qu.:0.9712   1st Qu.:0.9235   1st Qu.:0.9490  
+    ##  Median :0.9925   Median :1.0100   Median :0.9940   Median :0.9965  
+    ##  Mean   :0.9537   Mean   :0.9766   Mean   :0.9466   Mean   :0.9604  
+    ##  3rd Qu.:1.0200   3rd Qu.:1.0200   3rd Qu.:1.0200   3rd Qu.:1.0225  
+    ##  Max.   :1.1700   Max.   :1.1500   Max.   :1.1500   Max.   :1.1600  
+    ##  NA's   :134      NA's   :118      NA's   :62       NA's   :68      
+    ##       2000             2001             2002             2003       
+    ##  Min.   :0.0000   Min.   :0.5940   Min.   :0.5440   Min.   :0.4060  
+    ##  1st Qu.:0.9467   1st Qu.:0.9465   1st Qu.:0.9513   1st Qu.:0.9505  
+    ##  Median :0.9950   Median :0.9980   Median :0.9915   Median :0.9930  
+    ##  Mean   :0.9505   Mean   :0.9670   Mean   :0.9603   Mean   :0.9590  
+    ##  3rd Qu.:1.0200   3rd Qu.:1.0200   3rd Qu.:1.0200   3rd Qu.:1.0200  
+    ##  Max.   :1.1500   Max.   :1.1400   Max.   :1.1100   Max.   :1.1100  
+    ##  NA's   :70       NA's   :70       NA's   :74       NA's   :61      
+    ##       2004             2005             2006             2007       
+    ##  Min.   :0.5480   Min.   :0.5730   Min.   :0.5370   Min.   :0.5860  
+    ##  1st Qu.:0.9615   1st Qu.:0.9673   1st Qu.:0.9640   1st Qu.:0.9660  
+    ##  Median :0.9960   Median :0.9960   Median :0.9940   Median :0.9970  
+    ##  Mean   :0.9691   Mean   :0.9727   Mean   :0.9677   Mean   :0.9747  
+    ##  3rd Qu.:1.0200   3rd Qu.:1.0200   3rd Qu.:1.0100   3rd Qu.:1.0200  
+    ##  Max.   :1.1500   Max.   :1.1300   Max.   :1.1300   Max.   :1.1200  
+    ##  NA's   :57       NA's   :66       NA's   :63       NA's   :67      
+    ##       2008             2009             2010             2011       
+    ##  Min.   :0.6100   Min.   :0.6260   Min.   :0.6300   Min.   :0.6690  
+    ##  1st Qu.:0.9665   1st Qu.:0.9720   1st Qu.:0.9660   1st Qu.:0.9745  
+    ##  Median :0.9950   Median :0.9970   Median :0.9960   Median :0.9955  
+    ##  Mean   :0.9768   Mean   :0.9797   Mean   :0.9706   Mean   :0.9820  
+    ##  3rd Qu.:1.0200   3rd Qu.:1.0100   3rd Qu.:1.0100   3rd Qu.:1.0200  
+    ##  Max.   :1.1100   Max.   :1.1100   Max.   :1.1300   Max.   :1.1300  
+    ##  NA's   :69       NA's   :69       NA's   :63       NA's   :68      
+    ##       2012             2013             2014             2015      
+    ##  Min.   :0.6550   Min.   :0.6540   Min.   :0.6420   Min.   :0.646  
+    ##  1st Qu.:0.9770   1st Qu.:0.9798   1st Qu.:0.9790   1st Qu.:0.982  
+    ##  Median :0.9980   Median :1.0000   Median :1.0000   Median :1.000  
+    ##  Mean   :0.9901   Mean   :0.9866   Mean   :0.9857   Mean   :0.988  
+    ##  3rd Qu.:1.0200   3rd Qu.:1.0200   3rd Qu.:1.0200   3rd Qu.:1.020  
+    ##  Max.   :1.1500   Max.   :1.1500   Max.   :1.1300   Max.   :1.100  
+    ##  NA's   :81       NA's   :72       NA's   :71       NA's   :75     
+    ##       2016             2017             2018            2019       
+    ##  Min.   :0.6420   Min.   :0.6360   Min.   :0.728   Min.   :0.8900  
+    ##  1st Qu.:0.9830   1st Qu.:0.9855   1st Qu.:0.988   1st Qu.:0.9898  
+    ##  Median :1.0000   Median :1.0000   Median :1.010   Median :1.0100  
+    ##  Mean   :0.9909   Mean   :0.9933   Mean   :1.003   Mean   :1.0103  
+    ##  3rd Qu.:1.0150   3rd Qu.:1.0100   3rd Qu.:1.020   3rd Qu.:1.0225  
+    ##  Max.   :1.1200   Max.   :1.1200   Max.   :1.140   Max.   :1.1500  
+    ##  NA's   :77       NA's   :81       NA's   :89      NA's   :148     
+    ##       2020      
+    ##  Min.   :0.973  
+    ##  1st Qu.:1.006  
+    ##  Median :1.040  
+    ##  Mean   :1.024  
+    ##  3rd Qu.:1.050  
+    ##  Max.   :1.060  
+    ##  NA's   :201</code></pre>
+
+    <p>
+      Wow! That summary is long – probably because there are so many years covered here. (This is another reason why we like tidy data.) I don’t know about you, but I like my summaries to be shorter than this. Instead of reading it all, I’m going to pivot the dataframe now and then run another summary.
+    </p>
+    <pre class="r"><code>school <- school %>% 
+    pivot_longer(cols = -country, 
+                 names_to = "year",
+                 values_to = "ratio") %>% 
+    mutate(year = as.numeric(year))
+
+  summary(school)</code></pre>
+    <pre><code>##    country               year          ratio      
+  ##  Length:10608       Min.   :1969   Min.   :0.000  
+  ##  Class :character   1st Qu.:1982   1st Qu.:0.909  
+  ##  Mode  :character   Median :1994   Median :0.991  
+  ##                     Mean   :1994   Mean   :0.932  
+  ##                     3rd Qu.:2007   3rd Qu.:1.020  
+  ##                     Max.   :2020   Max.   :1.450  
+  ##                                    NA's   :4899</code></pre>
+    <p>
+      As we knew from seeing the dataframe, the years begin in 1969 and go to 2020. Luckily I’m not seeing any NA’s for years!
+    </p>
+    <p>
+      The most interesting observations come from the ratio column: - First of all, there are 4,899 <code>NA</code> values, which feels like a lot. We might have to deal with those when we go to work with the data. - Next, I notice that the ratios go from 0 (meaning that 0% of girls attend school in the country) to 1.45 (meaning that more girls than boys attend school). - The 1st quartile, median, mean are all over 0.9, so there is near-gender equality in schooling worldwide, but the median is higher than the mean, so that mean is probably brought down by several countries that have very few or no girls in school.
+    </p>
+    <blockquote>
+      <p>
+        What other observations can you add? Is there anything that surprised you about the data we’ve looked at so far?
+      </p>
+    </blockquote>
+
+    <h5 class="w3-text-grey">Step 3: Start asking questions</h5>
+    <p>
+      Since we noticed in the last step that worldwide there’s a mostly equal gender ratio, but that some countries have a very low gender ratio, we might start by asking which countries those are. We could also ask how gender equality has changed over time, since there are so many years in our sample. Maybe those low ratios are all from several decades ago – or maybe some countries still have very low school ratios.
+    </p>
+    <p>
+      Let’s start by asking how gender equality in education has changed over time.
+    </p>
+    <pre class="r"><code>school %>% 
+    ggplot(aes(x = year, 
+               y = ratio,
+               group = country)) +
+    geom_line()</code></pre>
+    <pre><code>## Warning: Removed 2559 row(s) containing missing values (geom_path).</code></pre>
+    <p>
+      <img src="img/all-ratios.png" width="100%"/>
+    </p>
+    <p>
+      That’s interesting! It seems like some countries have always had fairly steady gender ratios (as seen by that thick black line in the middle), while some countries’ gender ratios have historically been lower but are mostly now trending upwards. One country in particular seems to have had mostly girls in school, and is the only country to approaching gender equality from the “other end”.
+    </p>
+    <p>
+      Let’s say we’re interested in the countries with lower ratios. We can look at which countries have had the lowest ratios, and seeing how only those countries’ ratios have changed over time.
+    </p>
+    <p>
+      How do you think we can do that? We need to: - Find the countries with the lowest ratios - Filter only for those countries - Make the same graph
+    </p>
+    <p>
+      I would approach this topic by using <code>group_by()</code> and <code>mutate()</code> to find the average gender ratio for each country, and then filter for the lowest ratios – let’s say the lowest 10 countries.
+    </p>
+    <pre class="r"><code>#Step 1: Find average ratio of each country
+  school_low <- school %>%
+    group_by(country) %>% 
+    filter(!is.na(ratio)) %>% 
+    mutate(average = mean(ratio))
+    
+
+  #Step 2: Find the cutoff average (the highest average a country can have to be considered a 'low ratio' country)
+  school_low %>%  group_by(country) %>% 
+    summarize(average = mean(average)) %>% 
+    arrange(average) %>% 
+    head(10)</code></pre>
+    <pre><code>## # A tibble: 10 x 2
+  ##    country                  average
+  ##    <chr>                      <dbl>
+  ##  1 Afghanistan                0.437
+  ##  2 Somalia                    0.484
+  ##  3 Guinea-Bissau              0.496
+  ##  4 Guinea                     0.542
+  ##  5 Chad                       0.558
+  ##  6 Central African Republic   0.579
+  ##  7 Liberia                    0.594
+  ##  8 Togo                       0.599
+  ##  9 Pakistan                   0.601
+  ## 10 Gambia                     0.604</code></pre>
+    <p>
+      If we scroll to the end of the dataframe of the lowest 10 average ratios, we find Gambia at 0.6041250. That means we’re going to use that to filter for countries with an average ratio at or below 0.6041250 for our school_low dataframe.
+    </p>
+    <pre class="r"><code>school_low <- school_low %>% 
+    filter(average <= 0.6041250)
+
+  glimpse(school_low)</code></pre>
+    <pre><code>## Rows: 252
+  ## Columns: 4
+  ## Groups: country [10]
+  ## $ country <chr> "Afghanistan", "Afghanistan", "Afghanistan", "Afghanistan", "A…
+  ## $ year    <dbl> 1969, 1970, 1971, 1972, 1973, 1974, 1975, 1976, 1977, 1980, 19…
+  ## $ ratio   <dbl> 0.167, 0.161, 0.161, 0.169, 0.167, 0.174, 0.181, 0.192, 0.199,…
+  ## $ average <dbl> 0.4373889, 0.4373889, 0.4373889, 0.4373889, 0.4373889, 0.43738…</code></pre>
+    <p>
+      Now that we have this dataframe, let’s graph it!
+    </p>
+    <pre class="r"><code>school_low %>% 
+    ggplot(aes(x = year, 
+               y = ratio,
+               color = country)) +
+    geom_line()</code></pre>
+    <p>
+      <img src="img/low-ratios.png" width="100%"/>
+    </p>
+    <p>
+      Looking at the graph, we see that the majority of these “low ratio” countries have trended upwards between 1969 and 2020. However, Afghanistan is a clear outlier – and probably the reason why the summary minimum was so low earlier. They trended downwards between about 1992 and 2000.
+    </p>
+    <p>
+      We need background knowledge to answer the question, “Why did the ratio of girls to boys in school fall so sharply in Afghanistan between those years?” (For example, we could know about the Afghan Civil War from 1992 to ’96 and the rise of the Taliban.) However, we might not have access to that kind of background information. That would be where we could start using other datasets to answer questions brought up with our data.
+    </p>
+
+  </div>
+</div>
+
+<div class="w3-row w3-padding-0">
+  <div class="w3-twothird w3-container w3-margin-top">
+
+    <h3 class="w3-text-grey">Part 2: Using multiple datasets</h3>
+    <p>
+      We want to answer the question, “Why did the ratio of girls to boys in school fall so sharply in Afghanistan between those years?” Gapminder has a lot of data about different countries. Let’s try to brainstorm now about things that might affect girls in school, so that we can try to find data that might answer our question.
+    </p>
+    <p>
+      Here are some things I came up with: - Gender equality in society - Young mothers (who might not be able to go to school) - Poor economy, war, natural disasters that mean kids can’t go to school - Population – maybe there just ARE fewer girls than boys, for whatever reason!
+    </p>
+    <p>
+      <strong>Write down anything else you can come up with!</strong> The key to this list is that it’s not formal, nor are we sure that there ARE data to address all of these ideas. We’re just brainstorming for possibilities.
+    </p>
+    <p>
+      Now, we can take a look at gapminder (or another data source) and see if there are any data that match the “hypotheses” we’ve come up with. Right away, I see that gapminder has several sex ratio datasets and a gdp per capita dataset. While I don’t see data about teen or young mothers, I do see “Age at 1st marriage (women)”, which might be helpful.
+    </p>
+    <p>
+      I’m going to choose the Age at 1st marriage and GDP per capita datasets, but you don’t have to do the same! Feel free to choose another dataset that you think might be helpful and follow along!
+    </p>
+
+    <h4 class="w3-text-grey">First look at the new data</h4>
+    <p>
+      First thing’s first: let’s go through the same steps as earlier to take a look at our datasets. Since we already have a question in mind, we can skip “Step 3: Start asking questions”.
+    </p>
+
+    <h4 class="w3-text-grey">Dataset 3: Age at 1st marriage (women)</h4>
+
+    <h5 class="w3-text-grey">Step 1: Read the description</h5>
+    <p>
+      Description from gapminder: “The mean age, in years, of first marriage for women. Women who never married are excluded. Cohabitation is excluded. The data are based on multiple sources and definitions may vary.” 
+    </p>
+    <blockquote>
+      <p>
+        What critical questions can you askk of this dataset?
+      </p> 
+    </blockquote>
+    <p>
+      Let’s take a look at it!
+    </p>
+
+    <h5 class="w3-text-grey">Step 2: Load and look at the data!</h5>
+    <pre class="r"><code>marriage <- read_csv("https://amosca01.github.io/SSEP-22/data/age_at_1st_marriage_women.csv")</code></pre>
+    <pre><code>## Rows: 180 Columns: 391
+
+## ── Column specification ────────────────────────────────────────────────────────
+## Delimiter: ","
+## chr   (1): country
+## dbl (116): 1615, 1665, 1684, 1709, 1715, 1734, 1759, 1765, 1774, 1779, 1784,...
+## lgl (274): 1616, 1617, 1618, 1619, 1620, 1621, 1622, 1623, 1624, 1625, 1626,...
+
+## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+    <pre class="r"><code>head(marriage)</code></pre>
+    <pre><code>## # A tibble: 6 x 391
+##   country  `1615` `1616` `1617` `1618` `1619` `1620` `1621` `1622` `1623` `1624`
+##   <chr>     <dbl> <lgl>  <lgl>  <lgl>  <lgl>  <lgl>  <lgl>  <lgl>  <lgl>  <lgl> 
+## 1 Afghani…     NA NA     NA     NA     NA     NA     NA     NA     NA     NA    
+## 2 Angola       NA NA     NA     NA     NA     NA     NA     NA     NA     NA    
+## 3 Albania      NA NA     NA     NA     NA     NA     NA     NA     NA     NA    
+## 4 Netherl…     NA NA     NA     NA     NA     NA     NA     NA     NA     NA    
+## 5 United …     NA NA     NA     NA     NA     NA     NA     NA     NA     NA    
+## 6 Argenti…     NA NA     NA     NA     NA     NA     NA     NA     NA     NA    
+## # … with 380 more variables: 1625 <lgl>, 1626 <lgl>, 1627 <lgl>, 1628 <lgl>,
+## #   1629 <lgl>, 1630 <lgl>, 1631 <lgl>, 1632 <lgl>, 1633 <lgl>, 1634 <lgl>,
+## #   1635 <lgl>, 1636 <lgl>, 1637 <lgl>, 1638 <lgl>, 1639 <lgl>, 1640 <lgl>,
+## #   1641 <lgl>, 1642 <lgl>, 1643 <lgl>, 1644 <lgl>, 1645 <lgl>, 1646 <lgl>,
+## #   1647 <lgl>, 1648 <lgl>, 1649 <lgl>, 1650 <lgl>, 1651 <lgl>, 1652 <lgl>,
+## #   1653 <lgl>, 1654 <lgl>, 1655 <lgl>, 1656 <lgl>, 1657 <lgl>, 1658 <lgl>,
+## #   1659 <lgl>, 1660 <lgl>, 1661 <lgl>, 1662 <lgl>, 1663 <lgl>, 1664 <lgl>,
+## #   1665 <dbl>, 1666 <lgl>, 1667 <lgl>, 1668 <lgl>, 1669 <lgl>, 1670 <lgl>,
+## #   1671 <lgl>, 1672 <lgl>, 1673 <lgl>, 1674 <lgl>, 1675 <lgl>, 1676 <lgl>,
+## #   1677 <lgl>, 1678 <lgl>, 1679 <lgl>, 1680 <lgl>, 1681 <lgl>, 1682 <lgl>,
+## #   1683 <lgl>, 1684 <dbl>, 1685 <lgl>, 1686 <lgl>, 1687 <lgl>, 1688 <lgl>,
+## #   1689 <lgl>, 1690 <lgl>, 1691 <lgl>, 1692 <lgl>, 1693 <lgl>, 1694 <lgl>,
+## #   1695 <lgl>, 1696 <lgl>, 1697 <lgl>, 1698 <lgl>, 1699 <lgl>, 1700 <lgl>,
+## #   1701 <lgl>, 1702 <lgl>, 1703 <lgl>, 1704 <lgl>, 1705 <lgl>, 1706 <lgl>,
+## #   1707 <lgl>, 1708 <lgl>, 1709 <dbl>, 1710 <lgl>, 1711 <lgl>, 1712 <lgl>,
+## #   1713 <lgl>, 1714 <lgl>, 1715 <dbl>, 1716 <lgl>, 1717 <lgl>, 1718 <lgl>,
+## #   1719 <lgl>, 1720 <lgl>, 1721 <lgl>, 1722 <lgl>, 1723 <lgl>, 1724 <lgl>, …</code></pre>
+    <p>
+      Right away, I notice that Afghanistan is there (phew!) but so are many other countries. Since we’re focusing on Afghanistan right now, I’m going to filter out every other country.
+    </p>
+    <p>
+      I also notice that the years start at 1615, but the school data we have only starts at 1969. Let’s pivot this data, and then filter for year and Afghanistan.
+    </p>
+    <blockquote>
+      <p> 
+        Why do we need to pivot the data first?
+      </p> 
+    </blockquote>
+    <pre class="r"><code>marriage <- marriage %>% 
+  pivot_longer(cols = -country,
+               names_to = "year",
+               values_to = "marriage") %>% 
+  filter(country == "Afghanistan",
+         year >= 1969)
+
+head(marriage)</code></pre>
+      <pre><code>## # A tibble: 6 x 3
+##   country     year  marriage
+##   <chr>       <chr>    <dbl>
+## 1 Afghanistan 1969        NA
+## 2 Afghanistan 1970        NA
+## 3 Afghanistan 1971        NA
+## 4 Afghanistan 1972        NA
+## 5 Afghanistan 1973        NA
+## 6 Afghanistan 1974        NA</code></pre>
+
+      <p>
+        Uh-oh! It looks like we have a bunch of empty data for Afghanistan. Since we’re only looking at the first six rows, I wonder if there’s much data after 1974 or if there won’t be enough data to use it at all.
+      </p>
+      <p>
+        To get a better picture, let’s use summary().
+      </p>
+      <pre class="r"><code>summary(marriage)</code></pre>
+      <pre><code>##    country              year              marriage   
+##  Length:36          Length:36          Min.   :17.8  
+##  Class :character   Class :character   1st Qu.:17.8  
+##  Mode  :character   Mode  :character   Median :17.8  
+##                                        Mean   :17.8  
+##                                        3rd Qu.:17.8  
+##                                        Max.   :17.8  
+##                                        NA's   :34</code></pre>
+    <p>
+      Looking at the summary, there are 36 total years and 34 NA’s. One of the problems with our earlier dataset was also that there weren’t enough years to make a good assessment.
+    </p>
+
+    <h5 class="w3-text-grey">Conclusions</h5>
+    <p>
+      Sometimes a dataset doesn’t work out – and that’s okay! Part of being a data scientist is knowing when to move on. We do this exploratory work because not every dataset is perfect for our analysis, and we want to figure that out early on, before we get invested in the data.
+    </p>
+    <p>
+      Let’s move on now to another dataset that could address one of our other hypotheses.
+    </p>
+
+    <h4 class="w3-text-grey">Dataset 4: GDP/capita (US$, inflation-adjusted)</h4>
+
+    <h5 class="w3-text-grey">Step 1: Read the description</h5>
+    <p>
+      “GDP per capita is gross domestic product divided by midyear population. GDP is the sum of gross value added by all resident producers in the economy plus any product taxes and minus any subsidies not included in the value of the products. It is calculated without making deductions for depreciation of fabricated assets or for depletion and degradation of natural resources. Data are in constant 2010 U.S. dollars.” 
+    </p>
+    <p>
+     Wow! That’s a lot, and might be confusing. Here’s my short version: GDP per capita can be a good indicator of the economic situation of a country, since it measures the country’s wealth per person. <a href="https://en.wikipedia.org/wiki/List_of_countries_by_GDP_(PPP)_per_capita" target="_blank">Here’s</a> the wikipedia page on the topic if you want to read more.
+    </p>
+    <blockquote>
+      <p>
+        What critical questions can you ask of this dataset?
+      </p>
+    </blockquote>
+
+    <h5 class="w3-text-grey">Step 2: Load and look at the data!</h5>
+    <pre class="r"><code>gdp <- read_csv("https://amosca01.github.io/SSEP-22/data/gdppercapita_us_inflation_adjusted.csv")</code></pre>
+    <pre><code>## Rows: 210 Columns: 62
+
+## ── Column specification ────────────────────────────────────────────────────────
+## Delimiter: ","
+## chr (62): country, 1959, 1960, 1961, 1962, 1963, 1964, 1965, 1966, 1967, 196...
+
+## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+    <pre class="r"><code>head(gdp)</code></pre>
+    <pre><code>## # A tibble: 6 x 62
+##   country  `1959` `1960` `1961` `1962` `1963` `1964` `1965` `1966` `1967` `1968`
+##   <chr>    <chr>  <chr>  <chr>  <chr>  <chr>  <chr>  <chr>  <chr>  <chr>  <chr> 
+## 1 Aruba    <NA>   <NA>   <NA>   <NA>   <NA>   <NA>   <NA>   <NA>   <NA>   <NA>  
+## 2 Afghani… <NA>   <NA>   <NA>   <NA>   <NA>   <NA>   <NA>   <NA>   <NA>   <NA>  
+## 3 Angola   <NA>   <NA>   <NA>   <NA>   <NA>   <NA>   <NA>   <NA>   <NA>   <NA>  
+## 4 Albania  <NA>   <NA>   <NA>   <NA>   <NA>   <NA>   <NA>   <NA>   <NA>   <NA>  
+## 5 Andorra  <NA>   <NA>   <NA>   <NA>   <NA>   <NA>   <NA>   <NA>   <NA>   <NA>  
+## 6 United … <NA>   <NA>   <NA>   <NA>   <NA>   <NA>   <NA>   <NA>   <NA>   <NA>  
+## # … with 51 more variables: 1969 <chr>, 1970 <chr>, 1971 <chr>, 1972 <chr>,
+## #   1973 <chr>, 1974 <chr>, 1975 <chr>, 1976 <chr>, 1977 <chr>, 1978 <chr>,
+## #   1979 <chr>, 1980 <chr>, 1981 <chr>, 1982 <chr>, 1983 <chr>, 1984 <chr>,
+## #   1985 <chr>, 1986 <chr>, 1987 <chr>, 1988 <chr>, 1989 <chr>, 1990 <chr>,
+## #   1991 <chr>, 1992 <chr>, 1993 <chr>, 1994 <chr>, 1995 <chr>, 1996 <chr>,
+## #   1997 <chr>, 1998 <chr>, 1999 <chr>, 2000 <chr>, 2001 <chr>, 2002 <chr>,
+## #   2003 <chr>, 2004 <chr>, 2005 <chr>, 2006 <chr>, 2007 <chr>, 2008 <chr>,
+## #   2009 <chr>, 2010 <chr>, 2011 <chr>, 2012 <chr>, 2013 <chr>, 2014 <chr>,
+## #   2015 <chr>, 2016 <chr>, 2017 <chr>, 2018 <chr>, 2019 <chr></code></pre>
+    <p>
+      Again, let’s pivot and filter for Afghanistan after 1969.
+    </p>
+    <pre class="r"><code>mgdp <- gdp %>% 
+  pivot_longer(cols = -country,
+               names_to = "year",
+               values_to = "gdp") %>% 
+  filter(country == "Afghanistan",
+         year >= 1969) %>% 
+  mutate(year = as.numeric(year))
+
+head(gdp)</code></pre>
+      <pre><code>## # A tibble: 6 x 3
+##   country      year gdp  
+##   <chr>       <dbl> <chr>
+## 1 Afghanistan  1969 <NA> 
+## 2 Afghanistan  1970 <NA> 
+## 3 Afghanistan  1971 <NA> 
+## 4 Afghanistan  1972 <NA> 
+## 5 Afghanistan  1973 <NA> 
+## 6 Afghanistan  1974 <NA></code></pre>
+
+      <p>
+        I don’t like where this is going, because the first few rows are NA. Let’s see if there is usable data by filtering out NA values and seeing what remains!
+      </p>
+      <pre class="r"><code>gdp %>% 
+  filter(!is.na(gdp))</code></pre>
+      <pre><code>## # A tibble: 19 x 3
+##    country      year gdp  
+##    <chr>       <dbl> <chr>
+##  1 Afghanistan  2001 320  
+##  2 Afghanistan  2002 332  
+##  3 Afghanistan  2003 323  
+##  4 Afghanistan  2004 346  
+##  5 Afghanistan  2005 354  
+##  6 Afghanistan  2006 393  
+##  7 Afghanistan  2007 399  
+##  8 Afghanistan  2008 473  
+##  9 Afghanistan  2009 526  
+## 10 Afghanistan  2010 512  
+## 11 Afghanistan  2011 558  
+## 12 Afghanistan  2012 569  
+## 13 Afghanistan  2013 565  
+## 14 Afghanistan  2014 556  
+## 15 Afghanistan  2015 553  
+## 16 Afghanistan  2016 553  
+## 17 Afghanistan  2017 547  
+## 18 Afghanistan  2018 555  
+## 19 Afghanistan  2019 530</code></pre>
+      <p>
+        Okay! It looks like the values for GDP start in 2001 and go until 2019, which gives us 19 years of data to work with. It’s not as much as we might have hoped for, but let’s move on.
+      </p>
+
+      <h5 class="w3-text-grey">Combining datasets</h5>
+      <p>
+        Do you remember how to join data? Take a moment to look up a refresher if needed.
+      </p>
+      <p>
+        For this dataset, we need to combine school values for Afghanistan with <code>gdp</code> (which now contains only Afghanistan).
+      </p>
+      <pre class="r"><code>gschool <- school %>% 
+  filter(country == "Afghanistan") 
+
+afghanistan <- school %>% 
+  left_join(gdp, by = c("country", "year")) %>% 
+  filter(!is.na(gdp),
+         !is.na(ratio))
+  
+
+head(afghanistan)</code></pre>
+      <pre><code>## # A tibble: 6 x 4
+##   country      year ratio gdp  
+##   <chr>       <dbl> <dbl> <chr>
+## 1 Afghanistan  2002 0.544 332  
+## 2 Afghanistan  2003 0.406 323  
+## 3 Afghanistan  2004 0.548 346  
+## 4 Afghanistan  2005 0.573 354  
+## 5 Afghanistan  2006 0.567 393  
+## 6 Afghanistan  2007 0.586 399</code></pre>
+
+      <p>
+        This leaves us with data from 2002 to 2019, since the gender ratio data from 2001 was NA.
+      </p>
+      <p>
+        Now, we can look at whether Afghanistan’s GDP may be related to its school gender ratio.
+      </p>
+      <p>
+        Note that we can’t yet say that GDP caused the gender ratio – to do that, we need to use statistics to prove that one caused the other. You might know the phrase: “Correlation, not causation.”
+      </p>
+      <pre class="r"><code>afghanistan %>% 
+  ggplot(aes(x = gdp,
+             y = ratio)) +
+  geom_point()</code></pre>
+    <p>
+      <img src="img/afghanistan-ratio-gdp.png" width="100%"/>
+    </p>
+
+    <h5 class="w3-text-grey">Conclusion</h5>
+    <p>
+      Looking at the graph, we can say that as GDP increases in Afghanistan, the ratio of girls to boys in school seems to increase as well.
+    </p>
+  </div>
+</div>
+
+<div class="w3-row w3-padding-0">
+  <div class="w3-twothird w3-container w3-margin-top">
+
+    <h3 class="w3-text-grey">Your turn!</h3>
+    <blockquote>
+      <p>
+        We want to answer the question, “Why did the ratio of girls to boys in school fall so sharply in Afghanistan between those years?” Gapminder has a lot of data about different countries. Let’s try to brainstorm now about things that might affect girls in school, so that we can try to find data that might answer our question.
+      </p>
+    </blockquote>  
   </div>
 </div>
 
