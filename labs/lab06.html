@@ -45,9 +45,9 @@
       Now we can run our function on several different names without having to re-type all of that code. Here we find the popularity of names associated with actors and actresses who won at the <a href="https://en.wikipedia.org/wiki/91st_Academy_Awards">89th Academy Awards</a>.
     </p>
     <pre class="r"><code>most_popular_year(&quot;Olivia&quot;)
-    most_popular_year(&quot;Regina&quot;)
-    most_popular_year(&quot;Rami&quot;)
-    most_popular_year(&quot;Mahershala&quot;)</code></pre>
+most_popular_year(&quot;Regina&quot;)
+most_popular_year(&quot;Rami&quot;)
+most_popular_year(&quot;Mahershala&quot;)</code></pre>
   </div>
 </div>
 
@@ -76,6 +76,11 @@
     <p>
       Alternatively, you can use <code>return(blah)</code> to explicitly return objects. (I think) that every R function returns something (i.e., there is no such thing as a <a href="https://en.wikipedia.org/wiki/Void_type">&quot;void&quot; function</a>).
     </p>
+    <blockquote>
+      <p>
+        Rewrite <code>most_popular_year()</code> with a formal return statement. 
+      </p>
+    </blockquote>
     
     <h4 class="w3-text-grey">Default argument values</h4>
     <p>
@@ -122,8 +127,9 @@
       Note that if we unload the <code>babynames</code> package, thus removing the <code>babynames</code> table from the environment, our function no longer works.
     </p>
     <pre class="r"><code>detach(&quot;package:babynames&quot;, unload = TRUE)
-    # should throw an error
-    most_popular_year(&quot;Jordan&quot;)</code></pre>
+
+# should throw an error
+most_popular_year(&quot;Jordan&quot;)</code></pre>
     <p>
       Don't forget to bring <code>babynames</code> back.
     </p>
@@ -140,10 +146,12 @@
         head(1) %&gt;%
         select(year)
     }
-    # will throw error because we didn&#39;t specify &quot;data&quot;
-    most_popular_year_v2(name_arg = &quot;Logan&quot;)
-    # works
-    most_popular_year_v2(data = babynames, name_arg = &quot;Logan&quot;)</code></pre>
+    
+# will throw error because we didn&#39;t specify &quot;data&quot;
+most_popular_year_v2(name_arg = &quot;Logan&quot;)
+
+# works
+most_popular_year_v2(data = babynames, name_arg = &quot;Logan&quot;)</code></pre>
     <p>
       This also enables us to apply our function to subsets of the original data. So we can search for the most popular year for <code>Logan</code> among boys and girls separately.
     </p>
@@ -151,9 +159,14 @@
       filter(sex == &quot;F&quot;) %&gt;%
       most_popular_year_v2(name_arg = &quot;Logan&quot;)
 
-    babynames %&gt;%
+babynames %&gt;%
       filter(sex == &quot;M&quot;) %&gt;%
       most_popular_year_v2(name_arg = &quot;Logan&quot;)</code></pre>
+    <blockquote>
+      <p>
+        What if you wanted to find the most popular year for the name Logan <em>within the last 10 years only</em>? Use <code>most_popular)year_v2()</code> to do this.  
+      </p>
+    </blockquote>
     <p>
       Yay, tidy functions!
     </p>   
@@ -168,8 +181,8 @@
       Note that the order of the arguments matters only if they are <strong>not</strong> named.
     </p>
     <pre class="r"><code>most_popular_year_v2(babynames, &quot;Morganne&quot;)
-    most_popular_year_v2(&quot;Morganne&quot;, babynames)
-    most_popular_year_v2(&quot;Morganne&quot;, data = babynames)</code></pre>
+most_popular_year_v2(&quot;Morganne&quot;, babynames)
+most_popular_year_v2(&quot;Morganne&quot;, data = babynames)</code></pre>
     <p>
       To be safe (and explicit), name your arguments unless you have a good reason not to.
     </p>
@@ -208,18 +221,16 @@
       We wrote this function so that we could simplify the task of finding the most popular year for a specific name. If we only wanted to perform the task once, there would be no need to write the function, since we could just write the pipeline (that makes up the body of the function). If we only wanted to perform the task a few times, then just calling the function a few times would probably be OK:
     </p>
     <pre class="r"><code>most_popular_year(name_arg = &quot;Larry&quot;)
-    most_popular_year(name_arg = &quot;Moe&quot;)
-    most_popular_year(name_arg = &quot;Curly&quot;)</code></pre>
+most_popular_year(name_arg = &quot;Moe&quot;)
+most_popular_year(name_arg = &quot;Curly&quot;)</code></pre>
     
     <h4 class="w3-text-grey"><code>map()</code></h4>
     <p>
       But what if we had a long list of names? We wouldn't want to have to copy and paste the function call repeatedly. The solution is to create a vector that contains the names we're interested in, and then use the <code>map()</code> function to apply our function to each item in the vector. To read more about this function, type <code>?map</code> at the console.
     </p>
-    <blockquote>
-      <p>
-        Note: many other programming languages have a similar operation <a href="https://en.wikipedia.org/wiki/Map_(higher-order_function)"><code>map()</code></a>.
-      </p>
-    </blockquote>
+    <p>
+      Note: many other programming languages have a similar operation <a href="https://en.wikipedia.org/wiki/Map_(higher-order_function)"><code>map()</code></a>.
+    </p>
     <p>
       For example, Ab's friends have the following names:
     </p>
@@ -232,6 +243,11 @@
       The <code>map()</code> function will always return a <code>list</code> -- a data structure that we have not talked about much. In order to flatten the list, we need to use one of the <code>map_*()</code> functions that specifies the return data type. In this case, since <code>most_popular_year()</code> returns a <code>data.frame</code>, we use the <code>map_df()</code> function.
     </p>
     <pre class="r"><code>map_df(abs_family, most_popular_year)</code></pre>
+    <blockquote>
+      <p>
+        Repeat the steps above with the names of your friends. 
+      </p>
+    </blockquote>
     
     <h4 class="w3-text-grey">A note on <code>for</code> loops (if you're familiar with them)</h4>
     <p>
@@ -257,7 +273,8 @@
         arrange(desc(births)) %&gt;%
         head(10)
     }
-    top10(data = babynames)</code></pre>
+
+top10(data = babynames)</code></pre>
     <p>
       But now suppose we want to apply this function to each <em>decade</em>. We could try to split the <code>babynames</code> table into a list of data frames -- one for each decade -- and then then use <code>map()</code> to iterate over that list. Note that the resulting data frame has a variable called <code>decade</code>, but it doesn't say the range of years.
     </p>
@@ -273,7 +290,7 @@
     #   group_by(decade) %&gt;%
     #   group_map(~top10(.))
 
-    top_by_decade &lt;- babynames %&gt;% 
+top_by_decade &lt;- babynames %&gt;% 
       mutate(decade = 10 * floor(year / 10)) %&gt;%
       group_by(decade) %&gt;%
       group_modify(~top10(.))</code></pre>
@@ -296,8 +313,8 @@
       The 11th row of <code>top_by_decade</code> is:
     </p>
     <pre><code>  decade  name births
-       &lt;dbl&gt; &lt;chr&gt;  &lt;int&gt;
-    1   1890  Mary 131630</code></pre>
+&lt;dbl&gt; &lt;chr&gt;  &lt;int&gt;
+ 1   1890  Mary 131630</code></pre>
     <p>
       What does this say about the name <code>Mary</code>?
     </p> 
@@ -318,6 +335,9 @@
   <div class="w3-twothird w3-container w3-margin-top">
 
     <h3 class="w3-text-grey">More practice (w/ sample solutions)</h3>
+    <p>
+      Reminder: In order to knit your R markdown file you'll need to delete any lines of code that intentionally don't run (we added some of these above as we explored). 
+    </p>
     <p>
       As always, feel free to grab a dataset of your own and take these for a spin. If you're feeling like you want something a little more scaffolded, the following exercises use the <code>nycflights13</code> data package.
     </p>
@@ -365,7 +385,8 @@
         select(-sd, -lower.ci, -upper.ci) %&gt;%
         top_n(5, nflights)
     }
-    top_carriers()</code></pre>
+
+top_carriers()</code></pre>
   </div>
 </div>
 

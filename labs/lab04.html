@@ -5,10 +5,13 @@
 
 
     <p>
-      In this lab, we will learn how to join two tables together.
+      In this lab, we will learn how to join two tables together. 
+    <p>
+    <p>
+      We highly recommend referencing the lecture slides for help visualizing different joins while you go through this lab. 
     </p>
     <pre class="r"><code>library(tidyverse)
-    library(babynames)</code></pre>
+library(babynames)</code></pre>
     <p>
       <strong>Goal</strong>: by the end of this lab, you will be able to use <code>inner_join()</code> and <code>left_join()</code> to combine data from two different tables.
     </p>
@@ -43,7 +46,7 @@
                 earliest = min(year), 
                 latest = max(year))
 
-    ssa_births %&gt;%
+ssa_births %&gt;%
       summarize(N = n(), 
                 earliest = min(year), 
                 latest = max(year))</code></pre>
@@ -60,10 +63,10 @@
     <p>
       Using an <code>inner_join()</code>, the only rows in the result set will be those with corresponding matches in <em>both</em> tables.
     </p>
-    <pre class="r"><code>total_births_inner &lt; - census_births %&gt;%
+    <pre class="r"><code>total_births_inner &lt;- census_births %&gt;%
       inner_join(ssa_births, by = &quot;year&quot;) 
 
-    total_births_inner %&gt;%
+total_births_inner %&gt;%
       summarize(N = n(), 
                 earliest = min(year), 
                 latest = max(year))</code></pre>
@@ -76,20 +79,20 @@
     <pre class="r"><code>total_births_left &lt;- census_births %&gt;%
       left_join(ssa_births, by = &quot;year&quot;)
 
-    total_births_left %&gt;%
+total_births_left %&gt;%
       filter(is.na(N))</code></pre>
     <p>
       Looks like all of the years in the <code>census_births</code> table are in the <code>ssa_births</code> table. Just to prove to ourselves that <code>left_join</code> works as described, let's do an experiment. 
     </p> 
     <pre class="r"><code># create a version of ssa_births missing year 2012
-    ssa_births_no_2012 &lt;- ssa_births %&gt;%
-      filter(year != 2012)
+ssa_births_no_2012 &lt;- ssa_births %&gt;%
+    filter(year != 2012)
 
-    total_births_left &lt;- census_births %&gt;%
-      left_join(ssa_births_no_2012, by = &quot;year&quot;)
+total_births_left &lt;- census_births %&gt;%
+    left_join(ssa_births_no_2012, by = &quot;year&quot;)
 
-    total_births_left %&gt;%
-      filter(is.na(N))</code></pre>
+total_births_left %&gt;%
+    filter(is.na(N))</code></pre>
     <p>
       The data from 2012 exists in the <code>census_births</code> table, but not in the <code>ssa_births_no_2012</code> table. 
     </p>
@@ -99,7 +102,7 @@
     <pre class="r"><code>total_births_right &lt;- census_births %&gt;%
       right_join(ssa_births_no_2012, by = &quot;year&quot;)
 
-    total_births_right %&gt;%
+total_births_right %&gt;%
       filter(is.na(births))</code></pre>
     <p>
       Switching the order of the tables and switching back to <code>right_join()</code> will have the same effect. That is, <code>left_join(a, b)</code> is equivalent to <code>right_join(b, a)</code>.
@@ -113,7 +116,7 @@
     <pre class="r"><code>total_births &lt;- census_births %&gt;%
       full_join(ssa_births_no_2012, by = &quot;year&quot;)
 
-    total_births %&gt;%
+total_births %&gt;%
       filter(is.na(births) | is.na(N))</code></pre>
     <p>
       Now the set of years returned is the union of the years in the two tables.
@@ -136,18 +139,18 @@
       Uh-oh. Looks like the counts are mostly not the same. While they are strongly correlated,
     </p>
     <pre class="r"><code>total_births %&gt;%
-      summarize(correlation = cor(births.x, births.y, 
+      summarize(correlation = cor(births, N, 
                                   use = &quot;complete.obs&quot;))</code></pre>
     <p>
       the numbers are <em>not</em> the same.
     </p>
     <pre class="r"><code>library(ggplot2)
-    ggplot(data = total_births, aes(x = year, y = births)) +
-      geom_line(color = color = &quot;red&quot;) + 
-      geom_line(aes(y = N), color = &quot;blue&quot;)</code></pre>
+ggplot(data = total_births, aes(x = year, y = births)) +
+    geom_line(color = &quot;red&quot;) + 
+    geom_line(aes(y = N), color = &quot;blue&quot;)</code></pre>
     <blockquote>
       <p>
-        Do some detective work to find out why! <em>Hint: read the documentation for <code>babynames</code></em>.
+        Do some detective work to find out why! <em>Hint: read the documentation <code>?babynames</code></em>.
       </p>
     </blockquote>  
   </div>
@@ -158,7 +161,7 @@
 
     <h3 class="w3-text-grey">Your turn!</h3>
     <p>
-      Now let's try joining some tabvles from a dataset of your choosing. Don't have one? Try answering these questions using the <code>nycflights13</code> package.
+      Now let's try joining some tables from a dataset of your choosing. Don't have one? Try answering these questions using the <code>nycflights13</code> package.
     </p>
     <ol>
       <li>

@@ -89,7 +89,7 @@
 
     <h3 class="w3-text-grey">Example: <code>Housing prices</code></h3>
     <p>
-      Let’s start by taking a look at some data on housing prices:
+      Let’s start by taking a look at some data on housing prices (you can download this from the "Datasets" tab on the course website):
     </p>
     <pre class="r"><code>housing <- read.csv(&quot;filepath/landdata-states.csv&quot;)<br>glimpse(housing)</code></pre>
     <p>
@@ -168,9 +168,9 @@
       Now that we know about geometric objects and aesthetic mapping, we’re ready to make our first <code>ggplot</code>: a scatterplot. We’ll use <code>geom_point</code> to do this, which requires <code>aes</code> mappings for <code>x</code> and <code>y</code>; all others are optional.
     </p>
     <pre class="r"><code>hp2013Q1 <- housing %>%
-      filter(Date == 2013.25
+      filter(Date == 2013.25)
 
-    ggplot(hp2013Q1, aes(y = Structure.Cost, x = Land.Value)) + 
+ggplot(hp2013Q1, aes(y = Structure.Cost, x = Land.Value)) + 
       geom_point()</code></pre>
     <p>
       <img src="img/scatterplot-example-1.png" width="100%" />
@@ -181,19 +181,19 @@
       The output of the <code>ggplot()</code> function is an object. If we want to modify the plot that we created above, it’s helpful to store the plot as an object.
     </p>
     <pre class="r"><code>p1 <- ggplot(hp2013Q1, 
-        aes(x = Land.Value,
-            y = Structure.Cost))</code></pre>
+          aes(x = Land.Value,
+              y = Structure.Cost))</code></pre>
     <p>
       To actually show the plot, we just print it. Note: the aesthetic mappings defined in p1, will be used by any subsequent <code>geom</code>s that we add unless we override them.
     </p>
-    <pre class="r"><code>p</code></pre>
+    <pre class="r"><code>p1</code></pre>
 
     <h4 class="w3-text-grey">Lines</h4>
     <p>
       A plot constructed with <code>ggplot</code> can have more than one <code>geom</code>. In that case, the mappings established in the <code>ggplot()</code> call are plot defaults that can be added to or overridden. For example, we could add an aesthetic mapping for color to <code>Home.Value</code>:
     </p>
      <pre class="r"><code>p1 + 
-      geom_point(aes(color = Home.Value))</code></pre>
+    geom_point(aes(color = Home.Value))</code></pre>
     <p>
       <img src="img/geom_point-color.png" width="100%"/>
     </p>
@@ -201,7 +201,7 @@
       And we could add a regression line to our plot:
     </p>
      <pre class="r"><code>p1 + 
-      geom_smooth(method = "lm"))</code></pre>
+      geom_smooth(method = "lm")</code></pre>
     <p>
       <img src="img/geom_point-color-reg.png" width="100%"/>
     </p>
@@ -216,6 +216,14 @@
     <p>
       <img src="img/smoother-example-1.png" width="100%"/>
     </p>
+    <blockquote>
+      <p>
+        Do you know what the ribbon around the line represents? If yes, find someone who doesn't know and explain it to them. 
+      </p>
+      <p>
+        When do you think we might want the ribbon versus not? Brainstorm with the person next to you. 
+      </p>
+    </blockquote>
 
     <h4 class="w3-text-grey">Removing standard errors</h4>
     <p>
@@ -249,8 +257,8 @@
       Note that variables are mapped to aesthetics with the <code>aes()</code> function, while fixed visual cues are set outside the <code>aes()</code> call. This sometimes leads to confusion, as in this example:
     </p>
     <pre class="r"><code>p1 + 
-      geom_point(aes(size = 2), # not what you want because 2 is not a variable
-                color = "red") # this is fine -- turns all points red</code></pre>
+      geom_point(aes(size = 2), # doesn't work 
+                color = "red") # turns all points red</code></pre>
     <p>
       <img src="img/right-vs-wrong-aes-1.png" width="100%"/>
     </p>
@@ -265,7 +273,7 @@
     
     <h4 class="w3-text-grey">Mapping Variables to Other Aesthetics</h4>
     <p>
-      Other aesthetics are mapped in the same way as <code>x</code> and <code>y</code> in the previous example.
+      Other aesthetics are mapped in the same way as <code>x</code> and <code>y</code> in <code>p1</code>.
     </p>
    <pre class="r"><code>p1 + 
     geom_point(aes(color = region, 
@@ -338,14 +346,14 @@
       Start by constructing a dotplot showing the distribution of home values by <code>Date</code> and <code>State</code>.
     </p>
     <pre class="r"><code>p3 <- ggplot(housing, 
-        aes(x = State, y = Home.Price.Index)) 
+          aes(x = State, y = Home.Price.Index)) 
 
-    p4 <- p3 + geom_point(aes(color = Date), 
-                          alpha = 0.5,
-                          size = 1.5, 
-                          position = position_jitter(width = 0.25, height = 0))
+p4 <- p3 + geom_point(aes(color = Date), 
+                      alpha = 0.5,
+                      size = 1.5, 
+                      position = position_jitter(width = 0.25, height = 0))
 
-    p4</code></pre>
+p4</code></pre>
     <p>
       <img src="img/changing-scale-example-0.png" width="100%"/>
     </p>
@@ -355,7 +363,7 @@
     <pre class="r"><code>p4 <- p4 + 
       scale_x_discrete(name = "State Abbreviation")
 
-    p4</code></pre>
+p4</code></pre>
     <p>
       <img src="img/changing-scale-example-1.png" width="100%"/>
     </p>
@@ -364,12 +372,17 @@
     </p>
     <pre class="r"><code>p4 <- p4 + 
       scale_color_continuous(name = "",
-        breaks = c(1975.25, 1994.25, 2013.25),
-        labels = c(1971, 1994, 2013))
-    p4</code></pre>
+          breaks = c(1975.25, 1994.25, 2013.25),
+          labels = c(1971, 1994, 2013))
+p4</code></pre>
     <p>
       <img src="img/changing-scale-example-2.png" width="100%"/>
     </p>
+    <blockquote>
+      <p>
+        Did you notice what change adding breaks resulted in? 
+      </p>
+    </blockquote>
     <p>
       Next change the low and high values to <code>blue</code> and <code>red</code>:
     </p>
@@ -377,7 +390,7 @@
       scale_color_continuous(breaks = c(1975.25, 1994.25, 2013.25),
         labels = c(1971, 1994, 2013),
         low = "blue", high = "red")
-    p4</code></pre>
+p4</code></pre>
     <p>
       <img src="img/changing-color-example-1.png" width="100%"/>
     </p>
@@ -387,7 +400,7 @@
       <code>ggplot2</code> has a wide variety of color <code>scales</code>; here is an example using <code>scale_color_gradient2</code> to interpolate between three different colors:
     </p>
     <pre class="r"><code>p4 + 
-      scale_color_gradient2(breks = c(1975.25, 1994.25, 2013.25),
+      scale_color_gradient2(breaks = c(1975.25, 1994.25, 2013.25),
         labels = c(1971, 1994, 2013),
         low = "blue",
         high = "red",
@@ -515,9 +528,9 @@
       Let’s start by using a technique we already know: map <code>State</code> to <code>color</code>:
     </p>
     <pre class="r"><code>p5 <- ggplot(housing, aes(x = Date, 
-                                                   y = Home.Value))
+            y = Home.Value))
 
-    p5 + 
+p5 + 
       geom_line(aes(color = State))</code></pre>
     <p>
       <img src="img/line-plot-example-1.png" width="100%"/>
@@ -556,7 +569,7 @@
     <h4 class="w3-text-grey">First try: draw two separate lines</h4>
     <pre class="r"><code>housing_byyear <- aggregate(cbind(Home.Value, Land.Value) ~ Date, data = housing, mean)
 
-    ggplot(housing_byyear, aes(x=Date)) +
+ggplot(housing_byyear, aes(x=Date)) +
       geom_line(aes(y = Home.Value), color="red") +
       geom_line(aes(y = Land.Value), color="blue")</code></pre>
     <p>
@@ -568,11 +581,11 @@
       First we'll <code>pivot_longer</code> the values we want to plot:
     </p>
     <pre class="r"><code>library(tidyr)
-    home_land_byyear <- pivot_longer(housing_byyear,
-                                values_to = "value",
-                                names_to = "type",
-                                cols = c("Home.Value", "Land.Value"))</code></pre>
-    <p>
+home_land_byyear <- pivot_longer(housing_byyear,
+                              values_to = "value",
+                              names_to = "type",
+                              cols = c("Home.Value", "Land.Value"))</code></pre>
+   <p>
       Then we'll plot them:
     </p>
     <pre class="r"><code>ggplot(home_land_byyear,

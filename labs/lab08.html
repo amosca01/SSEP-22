@@ -20,18 +20,18 @@
     <pre class="r"><code>library(tidyverse)
 glimpse(ToothGrowth)</code></pre>
     <pre><code>## Rows: 60
-    ## Columns: 3
-    ## $ len  &lt;dbl&gt; 4.2, 11.5, 7.3, 5.8, 6.4, 10.0, 11.2, 11.2, 5.2, 7.0, 16.5, 16.5…
-    ## $ supp &lt;fct&gt; VC, VC, VC, VC, VC, VC, VC, VC, VC, VC, VC, VC, VC, VC, VC, VC, …
-    ## $ dose &lt;dbl&gt; 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 1.0, 1.0, 1.0,…</code></pre>
+## Columns: 3
+## $ len  &lt;dbl&gt; 4.2, 11.5, 7.3, 5.8, 6.4, 10.0, 11.2, 11.2, 5.2, 7.0, 16.5, 16.5…
+## $ supp &lt;fct&gt; VC, VC, VC, VC, VC, VC, VC, VC, VC, VC, VC, VC, VC, VC, VC, VC, …
+## $ dose &lt;dbl&gt; 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 1.0, 1.0, 1.0,…</code></pre>
     <pre class="r"><code>summary(ToothGrowth)</code></pre>
     <pre><code>##       len        supp         dose      
-    ##  Min.   : 4.20   OJ:30   Min.   :0.500  
-    ##  1st Qu.:13.07   VC:30   1st Qu.:0.500  
-    ##  Median :19.25           Median :1.000  
-    ##  Mean   :18.81           Mean   :1.167  
-    ##  3rd Qu.:25.27           3rd Qu.:2.000  
-    ##  Max.   :33.90           Max.   :2.000</code></pre>
+##  Min.   : 4.20   OJ:30   Min.   :0.500  
+##  1st Qu.:13.07   VC:30   1st Qu.:0.500  
+##  Median :19.25           Median :1.000  
+##  Mean   :18.81           Mean   :1.167  
+##  3rd Qu.:25.27           3rd Qu.:2.000  
+##  Max.   :33.90           Max.   :2.000</code></pre>
     <p>
       Hmm…the <code>dose</code> column looks a little funny. There are only three dosage values <code>[0.5, 1 ,2]</code>, but <code>R</code> is interpreting them as continuous. We can tell <code>R</code> that we want to convert them to categories (a.k.a. <code>factors</code>) using <code>dplyr</code> like this:
     </p>
@@ -42,12 +42,12 @@ glimpse(ToothGrowth)</code></pre>
     </p>
     <pre class="r"><code>summary(ToothGrowth)</code></pre>
     <pre><code>##       len        supp     dose   
-    ##  Min.   : 4.20   OJ:30   0.5:20  
-    ##  1st Qu.:13.07   VC:30   1  :20  
-    ##  Median :19.25           2  :20  
-    ##  Mean   :18.81                   
-    ##  3rd Qu.:25.27                   
-    ##  Max.   :33.90</code></pre>
+##  Min.   : 4.20   OJ:30   0.5:20  
+##  1st Qu.:13.07   VC:30   1  :20  
+##  Median :19.25           2  :20  
+##  Mean   :18.81                   
+##  3rd Qu.:25.27                   
+##  Max.   :33.90</code></pre>
     <p>
       Much better! Now let’s draw a graph.
     </p>
@@ -89,6 +89,11 @@ my_plot</code></pre>
     <p>
       <img src="img/unnamed-chunk-4-1.png" width="100%"/>
     </p>
+    <blockquote>
+      <p>
+        Use the other three colors in the official Smith College Color Pallet to change the colors on the boxplot again. 
+      </p>
+    </blockquote>
   </div>
 </div>
 
@@ -154,6 +159,11 @@ library(nasaweather)</code></pre>
     <blockquote>
       <p>
         Do you think a sequential or diverging color scheme is most appropriate for wind speed? Justify your answer.
+      </p>
+    </blockquote>
+    <blockquote>
+      <p>
+        Replicate the faceted graph above for a year other than 1995. 
       </p>
     </blockquote>
   </div>

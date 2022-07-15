@@ -6,6 +6,9 @@
     <p>
       In this lab, we will learn how to convert data tables into a tidy form. We will learn about functions in the <code>tidyr</code> package, which is part of the <code>tidyverse</code> meta-package.
     </p>
+    <p>
+      As you work through this lab we highly recomment referencing the lecture slides for visualizations of different pivots. 
+    </p>
     <pre class="r"><code>library(tidyverse)<br>library(babynames)</code></pre>
     <p>
       <strong>Goal</strong>: by the end of this lab, you will understand what tidy data is and how to convert a wide table into a narrow table, and vice versa.
@@ -64,10 +67,10 @@
       group_by(year) %&gt;%
       summarize(num_rows = n(), births = sum(n))
 
-    total_births &lt;- births %&gt;%
+total_births &lt;- births %&gt;%
       left_join(ssa_births, by = &quot;year&quot;)
 
-    head(total_births)</code></pre>
+head(total_births)</code></pre>
     <p>
       Let's forget about <code>num_rows</code> and rename the variables.
     </p>
@@ -80,9 +83,10 @@
     <p>
       This data frame has 109 rows and 3 columns:
     </p>
-    <pre class="r"><code>dim(total_births)</code></pre>
+    <pre class="r"><code>dim(total_births)
+head(total_births)</code></pre>
     <p>
-      ...but what we want is a data frame that has 218 rows and three columns: <code>year</code>, <code>source</code>, and <code>births</code>. This data frame would be tidy, because it has fewer columns. The <code>pivot_longer()</code> function will help us get there.
+      ...but what we want is a data frame that has 218 rows (one for each observation) and three columns: <code>year</code>, <code>source</code>, and <code>births</code>. This data frame would be tidy, because it has a row for each individual observation. The <code>pivot_longer()</code> function will help us get there.
     </p>
     <pre class="r"><code>births_tidy &lt;- total_births %&gt;%
       pivot_longer(cols = c(ssa, census), 
@@ -90,9 +94,9 @@
                    values_to = &quot;births&quot;) %&gt;%
       arrange(year)
 
-    head(births_tidy)
+head(births_tidy)
 
-    dim(births_tidy)</code></pre>
+dim(births_tidy)</code></pre>
     <p>
       See what happened? View <code>births_tidy</code> in several different ways if necessary, and make sure that you understand where each piece of data went.
     </p>
@@ -119,7 +123,7 @@
     <h5 class="w3-text-grey">Step 2:</h5>
     <blockquote>
       <p>
-        Read the CSV into R using <code>read_csv()</code>. Pay careful attention to the path names! Your code will look something like this:
+        Read the CSV into R using <code>read_csv()</code>. Pay careful attention to the path names (if you don't know how to find a path name, we're here to help!)! Your code will look something like this:
       </p>
     </blockquote>
     <pre class="r"><code>hiv &lt;- read_csv(&quot;~/Downloads/sh_dyn_aids_zs.csv&quot;)</code></pre>
@@ -131,7 +135,7 @@
       </p>
     </blockquote>
     <pre class="r"><code>head(hiv)
-    dim(hiv)</code></pre>
+dim(hiv)</code></pre>
     
     <h5 class="w3-text-grey">Step 4:</h5>
     <blockquote>
@@ -143,7 +147,7 @@
     <h5 class="w3-text-grey">Step 5:</h5>
     <blockquote>
       <p>
-        Use <code>pivot_longer()</code> and/or <code>pivot_wider()</code> to convert your data into a tidy format. Check that it has the right dimensions.
+        Use <code>pivot_longer()</code> and/or <code>pivot_wider()</code> to convert your data into a tidy format. Check that it has the right dimensions.<br>In addition, look at your result and see if you can figure out what <code>sub("X", "", year))</code> does. 
       </p>
     </blockquote>
     <pre class="r"><code>hiv &lt;- hiv %&gt;%

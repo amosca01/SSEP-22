@@ -52,7 +52,7 @@
 
     <h3 class="w3-text-grey">A better way: aggregation</h3>
     <p>
-      Remember that <code>summarize()</code> takes a list of definitions for columns you want to see in the result set. The key to understanding <code>summarize()</code> is to note that it operates on vectors (which may contain many values), but each variable defined within <code>summarize()</code> <strong>must return a single value</strong> (per group). [Why?]
+      Remember that <code>summarize()</code> takes a list of definitions for columns you want to see in the result set. The key to understanding <code>summarize()</code> is to note that it operates on columns (which may contain many values), but each variable defined within <code>summarize()</code> <strong>must return a single value</strong> (per group). [Why?]
     </p>
     <p>
       Thus, the variables defined by the arguments to <code>summarize()</code> usually involve <em>aggregate</em> functions like <code>sum()</code>, <code>mean()</code>, <code>length()</code>, <code>max()</code>, <code>n()</code>, etc. In this case, we can use the conditional <code>ifelse()</code> statement around a <code>sum()</code> to extract the number of <code>F</code> babies born in each year [this will be our numerator], and another one to extract the total number of <code>M</code> babies born in that same year [this will be our denominator]:
@@ -73,11 +73,21 @@
                 ratio = sum(ifelse(sex == &quot;F&quot;, n, 0)) / 
                         sum(ifelse(sex == &quot;M&quot;, n, 0)),
                 howfaroff = abs(1 - ratio)) %&gt;%
-      filter(N == 2)  %&gt;% # Filter to years where there were M and F babies with name
+      filter(N == 2)  %&gt;% 
       arrange(howfaroff)</code></pre>
-    <p>
-      Let's take these functions out for a spin by answering a couple of questions!
-    </p>
+    <blockquote>
+      <p>
+        Above, we filter to <code>N == 2</code>. Why do you think we choose 2 here? Discuss with your neighbor.  
+      </p>
+    </blockquote>
+      <p>
+        Let's take these functions out for a spin by answering a couple of questions!
+      </p>
+    <blockquote>
+      <p>
+        Pair with the person next to you. Take turns going through each example question and answer below. On your turn, explain the solution code to your partner. Explicitly state what each line of code does and why it is included. 
+      </p>
+    </blockquote>
     
     <h4 class="w3-text-grey">1. Bumper crop</h4>
     <p>

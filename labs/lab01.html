@@ -60,7 +60,7 @@
      <h4 class="w3-text-grey">Creating a reproducible lab report</h4>
     
     <p>
-      We will be using R Markdown to create reproducible lab reports. Remember, key pieces of ethical data science are (1) transparancy in your analyses, and (2) reproducibility. See the following videos describing more about why and how we use R Markdown:
+      We will be using R Markdown to create reproducible lab reports. Remember, key pieces of ethical data science are (1) transparancy in your analyses, and (2) reproducibility. See the following videos describing more about why and how we use R Markdown (these are for reference and examples only, you do not need to mimic what happens in the videos yourself):
     </p>
     <p>
       <a href="https://youtu.be/lNWVQ2oxNho"><strong>Why use R Markdown for Lab Reports?</strong></a>
@@ -75,6 +75,11 @@
     <p>
       Going forward you should refrain from typing your code directly in the console, and instead type any code (final correct answer, or anything you're just trying out) in the R Markdown file and run the chunk using either the Run button on the chunk (green sideways triangle) or by highlighting the code and clicking <code>Run</code> on the top right corner of the R Markdown editor. If at any point you need to start over, you can <code>Run All Chunks</code> above the chunk you're working in by clicking on the down arrow in the code chunk.
     </p>
+    <blockquote>
+      <p>
+        Open a the markdown file linked above, or start one from scratch, and make sure <code>tidyverse</code> is loaded. 
+      </p>
+    </blockquote>
 
   </div>
 </div>
@@ -154,7 +159,7 @@
       </li>
     </ul>
     <p>
-      This command instructs R to load some data (specifically, revenue and advertising data from <em>Advertising Age</em>'s 14th annual Magazine 300 Report, which was released in September 2003) and to save that data as an objet with the name  `magazines`. You should see that the workspace area in the upper righthand corner of the RStudio window now lists a dataset called <code>magazines</code> that has 204 observations (obs.) on 5 variables. The <code><-</code> symbol you used in this command is the assignment operator in R. We read this symbol as &lq;gets&rq;, for example if you were reading out loud the command we just ran you would say something like: &lq;<code>magazines</code> gets <em>Advertising Age</em> data&rq;.
+      This command instructs R to load some data (specifically, revenue and advertising data from <em>Advertising Age</em>'s 14th annual Magazine 300 Report, which was released in September 2003) and to save that data as an objet with the name  `magazines`. You should see that the workspace area in the upper righthand corner of the RStudio window now lists a dataset called <code>magazines</code> that has 204 observations (obs.) on 5 variables. The <code><-</code> symbol you used in this command is the assignment operator in R. We read this symbol as &quot;gets&quot;, for example if you were reading out loud the command we just ran you would say something like: &quot;<code>magazines</code> gets <em>Advertising Age</em> data&quot;.
     </p>
     <p>
       As you interact with R, you will create a series of objects. Sometimes you'll load them from a file as we have done here, and sometimes you'll create them yourself as the byproduct of a computation or some analysis you have performed.
@@ -310,7 +315,7 @@
     <pre class="r"><code>magazines &lt;- magazines %&gt;%
       mutate(PerPageRevenue = AdRevenue / AdPages)</code></pre>
     <p>
-      <strong>Tip: </strong> If you use the up and down arrow keys, you can scroll through your previous commands, your so-called command history. You can also access it by clicking on the history tab in the upper right panel. This will save you a lot of typing in the future.
+      <strong>Tip: </strong> If you use the up and down arrow keys in the console, you can scroll through your previous commands, your so-called command history. You can also access it by clicking on the history tab in the upper right panel. This will save you a lot of typing in the future.
     </p>
     <p>
       Finally, in addition to simple mathematical operators like subtraction and division, you can ask R to make comparisons like greater than, <code>&gt;</code>, less than, <code>&lt;</code>, and equality, <code>==</code>. For example, we can ask if a magazine does better at newsstand (one-off)or subscription sales with the expression:
@@ -354,7 +359,7 @@
 <div class="w3-row w3-padding-0">
   <div class="w3-twothird w3-container w3-margin-top">
     <p>
-      This is a product of OpenIntro that is released under a <a href="http://creativecommons.org/licenses/by-sa/3.0">Creative Commons Attribution-ShareAlike 3.0 Unported</a>. This lab was adapted for <a href="https://www.openintro.org/">OpenIntro by Andrew Bray and Mine Çetinkaya-Rundel</a> from a lab written by <a href="http://www.stat.ucla.edu/~cocteau/">Mark Hansen of UCLA Statistics</a>, was modified for MassMutual DSDP by <a href="jcrouser.github.io">R. Jordan Crouser</a> in June 2021, and was modified for the Smith College SSEP by Ab Mosca in June 2022.
+      This is a product of OpenIntro that is released under a <a href="http://creativecommons.org/licenses/by-sa/3.0">Creative Commons Attribution-ShareAlike 3.0 Unported</a>. This lab was adapted for <a href="https://www.openintro.org/">OpenIntro by Andrew Bray and Mine Çetinkaya-Rundel</a> from a lab written by <a href="http://www.stat.ucla.edu/~cocteau/">Mark Hansen of UCLA Statistics</a>, was modified for MassMutual DSDP by <a href="https://jcrouser.github.io/">R. Jordan Crouser</a> in June 2021, and was modified for the Smith College SSEP by Ab Mosca in June 2022.
     </p>
   </div>
 </div>

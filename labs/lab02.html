@@ -52,7 +52,7 @@
       We'll start by loading the <code>babynames</code> package, which contains data about names given to babies born in the United States beginning in 1880 (Remember: if you have not previously installed `babynames` you need to do that first (<code>install.packages("babynames")</code>)):
     </p>
     <pre class="r"><code>library(babynames)
-    head(babynames)</code></pre>
+head(babynames)</code></pre>
     <blockquote>
       <p>
         Tip: if you want to learn more about a package or function in R, use the ? operator like this:
@@ -69,8 +69,8 @@
       You can extract a subset of the <strong>columns</strong> using <code>select()</code> (Note: the <code>head()</code> function tells R to print only the first few rows of the data instead of the entire dataset):
     </p>
     <pre class="r"><code>babynames %&gt;%
-      select(year, name, n) %&gt;%
-      head()</code></pre>
+      select(year, name, n) 
+head()</code></pre>
 
     <h4><code>filter()</code></h4>
     
@@ -78,11 +78,11 @@
       Similarly, you can extract a subset of the <strong>rows</strong> using <code>filter()</code>:
     </p>
     <pre class="r"><code># Replace &#39;Ab&#39; with your own name if you like!
-    babynames %&gt;%
-      filter(name == &quot;Ab&quot;) %&gt;%
-      head()</code></pre>
+babynames %&gt;%
+    filter(name == &quot;Ab&quot;) %&gt;%
+head()</code></pre>
     <p>
-      You'll notice that inside the <code>filter()</code> command is a <strong>boolean statement</strong> (hence the double equals sign). This is because <code>filter()</code> is akin to asking for all rows where a particular condition is true (in this case, where the value of <code>name</code> is equal to &quot;Ab&quot;).
+      You'll notice that inside the <code>filter()</code> command is a <strong>logical statement</strong> (hence the double equals sign). This is because <code>filter()</code> is akin to asking for all rows where a particular condition is true. In this case, where the value of <code>name</code> is exactly equal to &quot;Ab&quot;. We could also do this for, say, year with the <strong>logical statement</strong> <code>year == 2000</code>. Notice that we only need to use quotation marks for strings, not numbers.  
     </p>
   
     <h4 class="w3-text-grey">Combining verbs (sneak peek)</h4>
@@ -91,12 +91,22 @@
       Like with most programming languages, we can pass the value returned by one function into another function. The following code first <code>filter</code>s the data, then <code>select</code>s some specific columns, and finally assigns the result to a new object using the <code>&lt;-</code> operator:
     </p>
     <pre class="r"><code>ab &lt;- babynames %&gt;%
-                filter(name == &quot;Ab&quot;) %&gt;%
-                select(year, name, sex, n)</code></pre>
+            filter(name == &quot;Ab&quot;) %&gt;%
+            select(year, name, sex, n)</code></pre>
+    <blockquote>
+      <p>
+        One of the columns we selected above is "n". Talk to your neighbor to discuss what you think "n" means here, and in general with respect to data. 
+      </p>
+    </blockquote>
     <p>
       Now let's check the dimensions of that object:
     </p>
     <pre class="r"><code>dim(ab)</code></pre>
+    <blockquote>
+      <p>
+        Talk to your neighbor to discuss what you think dimensions means in this context. 
+      </p>
+    </blockquote>
     <p>
       We might also want to view the first few rows:
     </p>
@@ -114,18 +124,11 @@
     <p>
       Let's make a quick plot of the popularity of <code>Ab</code> over time. To do this, we'll use the <code>ggplot2</code> package:
     </p>
-    <pre class="r"><code># Load ggplot
-    library(ggplot2)
+    <pre class="r"><code>library(ggplot2)
 
-    # Create a ggplot object where:
-    #   - the data is contained in the &#39;ab&#39; object
-    #   - the &#39;year&#39; column is mapped to the x-axis
-    #   - the &#39;n&#39; column is mapped to the y-axis
-    ggplot(data = ab, aes(x = year, y = n)) + #&lt;- the &#39;+&#39; operator means we&#39;re adding to this plot
-      # represent the data as a line chart,
-      # break the data up by &#39;sex&#39; and give each group its own color
-      geom_line(aes(color = sex))</code></pre>
-    <p>
+ggplot(data = ab, aes(x = year, y = n)) + 
+    geom_line(aes(color = sex))</code></pre>
+  <p>
       Pretty cool, huh? Don't worry too much about the details of constructing this plot, we'll have a whole lab on data visualization soon :-)
     </p>
  
@@ -146,8 +149,8 @@
     </p>
     <pre class="r"><code>popular &lt;- babynames %&gt;%
       filter(is_popular)
-    nrow(popular) # count number of rows 
-    head(popular)</code></pre>
+nrow(popular) # count number of rows 
+head(popular)</code></pre>
     <p>
       What are the single most popular names of all time? To find them we can <code>arrange()</code> the table in descending order of the proportion of babies who got that name.
     </p>
@@ -161,7 +164,7 @@
     <pre class="r"><code># YOUR SOLUTION HERE</code></pre>
     <blockquote>
       <p>
-        Next, choose a name and find the <code>year</code> in which that name was used <strong>most frequently</strong>.
+        Next, choose a name and find the <code>year</code> in which that name was used <strong>most frequently</strong>. Make sure you use code to do this! 
       </p>
     </blockquote>
     <pre class="r"><code># YOUR SOLUTION HERE</code></pre>
