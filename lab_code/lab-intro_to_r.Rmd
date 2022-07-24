@@ -18,7 +18,7 @@ get to that stage, however, you need to build some basic fluency in R. Today we
 begin with the fundamental building blocks of R and RStudio: the interface, 
 reading in data, and basic commands.
 
-Go ahead and launch RStudio. 
+Go ahead and launch RStudio (go to: [rstudio.smith.edu](https://rstudio.smith.edu)). 
 
 The panel on the left is where the action happens. It's called the *console*. 
 Everytime you launch RStudio, it will have the same text at the top of the 
