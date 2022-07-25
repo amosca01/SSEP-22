@@ -29,7 +29,7 @@ Each of the five data "verbs" takes a data frame as its first argument and retur
 When in doubt, reference the data transformation [cheat sheet](https://www.rstudio.com/resources/cheatsheets/). Pay careful attention to the pictures!
 
 ### Load in some data
-We'll start by loading the `babynames` package, which contains data about names given to babies born in the United States beginning in 1880 (Remember: if you have not previously installed `babynames` you need to do that first (`install.packages("babynames")`).):
+We'll start by loading the `babynames` package, which contains data about names given to babies born in the United States beginning in 1880:
 
 ```{r, message=FALSE}
 library(babynames)

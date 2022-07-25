@@ -48,16 +48,9 @@ and many others in the future, we will use the following R packages:
 - `tidyverse`: an umbrella package that encompasses the previous two and many more
 
 If these packages are not already available in your R environment, 
-install them by typing the following line of code into
-the console of your RStudio session and pressing the enter/return key. 
+you will need to install them. 
 Note that you can check to see which packages (and which versions) are installed by
 inspecting the *Packages* tab in the lower right panel of RStudio. 
-
-```{r install-packages, message = FALSE, eval=FALSE}
-install.packages("tidyverse")
-```
-
-You may need to select a server from which to download; any of them will work.
 
 Next, you need to load these packages in your working environment. We do this with
 the `library` function. Run the following line in your console.
@@ -66,8 +59,7 @@ the `library` function. Run the following line in your console.
 library(tidyverse)
 ```
 
-Note that you only need to *install* packages once, but you need to *load* 
-them each time you relaunch RStudio. 
+Note that you need to *load* packages each time you relaunch RStudio. 
 
 
 ### Creating a reproducible lab report

@@ -64,7 +64,7 @@ my_plot +
 ```
 
 ## Changing colors with `RColorBrewer`
-That looks pretty nice, but we could spend an awful lot of time making tiny tweaks to color palettes by hand. Luckily Cynthia Brewer over at [ColorBrewer](http://colorbrewer2.org) has come up with some really good ones we can borrow! Let's load the `RColorBrewer` library and check it out. **Note:** you might need to `install.packages('RColorBrewer')` if you're running `R` on your laptop.
+That looks pretty nice, but we could spend an awful lot of time making tiny tweaks to color palettes by hand. Luckily Cynthia Brewer over at [ColorBrewer](http://colorbrewer2.org) has come up with some really good ones we can borrow! Let's load the `RColorBrewer` library and check it out. 
 
 ```{r}
 library(RColorBrewer)
@@ -90,10 +90,9 @@ That looks a little bit... Valentine-y?
 my_plot +
   scale_fill_brewer(palette = "Dark2")
 ```
-Let's try another. Install the `nasaweather` package, and load it.
+Let's try another. Load the `nasaweather` package.
     
 ```{r}
-install.packages("nasaweather")
 library(nasaweather)
 ```
 
