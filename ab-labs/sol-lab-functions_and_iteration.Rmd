@@ -357,7 +357,22 @@ top_carriers()
 ## Your Turn! 
 Download the World Happiness data for 2015 and use functions and iteration to answer the following questions
 
+```{r}
+
+world_happiness <- read_csv("/Users/abmosca/Documents/Documents/SSEP-22/data/2015.csv")
+
+```
+
 > Write a function that takes as input the name of a region, and returns the average GDP for the input region. 
+
+```{r}
+
+region_gdp <- function(ds, region_name) {
+  ds %>% 
+    filter(Re)
+}
+
+```
      
 > Use your function to find the average GDP for each region in the dataset. 
 
