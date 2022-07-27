@@ -173,8 +173,9 @@ Now let's try joining some tabvles from a dataset of your choosing. Don't have o
 
 ```{r echo = F}
 library(nycflights13)
+
 flights %>%
-  left_join(airlines, by = c("carrier" = "carrier")) %>%
+  left_join(airlines, by = "carrier") %>%
   group_by(name) %>%
   summarise(avg_delay = mean(arr_delay, na.rm = TRUE))
 ```

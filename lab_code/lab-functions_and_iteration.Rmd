@@ -354,3 +354,14 @@ top_carriers <- function(airport = "MCO") {
 top_carriers()
 ```
 
+## Your Turn! 
+Download the World Happiness data for 2019 and use functions and iteration to answer the following questions
+
+> Write a function that takes as input the name of a region, and returns the average GDP for the input region. 
+     
+> Use your function to find the average GDP for each region in the dataset. 
+
+> Write a function that takes as input the name of a region and a number, and returns which countries in the input region have a Generosity score greater than the input number. 
+     
+> Use your function to find which countries in Western Europe, Eastern Asia, and Sub-Saharan Africa have Generosity greater than 0.02. 
+
