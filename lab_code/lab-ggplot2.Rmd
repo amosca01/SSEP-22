@@ -384,8 +384,8 @@ Now let's try building a few visualizations of your own. Try answering these que
 > #. Create a scatterplot of the value of each home in the first quarter of 2013 as a function of the value of the land.
 #. Store the scatterplot that you created in the previous exercise as an object called `home_value_plot`.
 #. In your `home_value_plot`, map color to the cost of the structure and show your scatterplot.
-#. Let's return to p4. Since a home price index of 1 is an important benchmark, it is worth highlighting as contextual reference in our plot. Use `geom_vline()` to add a dotted, black, vertical line to p4.
-#. Recall that layers in <code>ggplot2</code> are added sequentially. How would you put the dotted vertical line you created in the previous exercise **behind** the data values?
+#. Let's return to p4. Since a home price index of 1 is an important benchmark, it is worth highlighting as contextual reference in our plot. Use `geom_hline()` to add a dotted, black, horizontal line to p4.
+#. Recall that layers in ggplot2 are added sequentially. How would you put the dotted vertical line you created in the previous exercise **behind** the data values?
 #. Use a `facet_wrap` to create a data graphic of your choice that illustrates something interesting about home prices.
 
 <div id="license">

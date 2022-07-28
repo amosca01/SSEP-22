@@ -405,16 +405,27 @@ Now let's try building a few visualizations of your own. Try answering these que
 highlighting as contextual reference in our plot. Use `geom_vline()` to add a dotted, black, vertical line to p4.
 ```{r}
 # sample solution
-    home_plot + 
-      geom_vline(aes(xintercept = 1), linetype = 3, color = "black") + 
+p4 + 
       scale_color_gradient2(breaks = c(1975.25, 1994.25, 2013.25),
                         labels = c(1971, 1994, 2013),
                         low = "blue",
                         high = "red",
                         mid = "gray60",
-                        midpoint = 1994.25)
+                        midpoint = 1994.25) + 
+      geom_hline(yintercept = 1, linetype = 3, color = "black")
 ```
-#. Recall that layers in <code>ggplot2</code> are added sequentially. How would you put the dotted vertical line you created in the previous exercise **behind** the data values?
+#. Recall that layers in ggplot2 are added sequentially. How would you put the dotted horizontal line you created in the previous exercise **behind** the data values?
+```{r}
+# sample solution
+p4 + 
+  geom_hline(yintercept = 1, linetype = 3, color = "black") + 
+  scale_color_gradient2(breaks = c(1975.25, 1994.25, 2013.25),
+                        labels = c(1971, 1994, 2013),
+                        low = "blue",
+                        high = "red",
+                        mid = "gray60",
+                        midpoint = 1994.25) 
+```
 
 #. Use a `facet_wrap` to create a data graphic of your choice that illustrates something interesting about home prices.
 ```{r}

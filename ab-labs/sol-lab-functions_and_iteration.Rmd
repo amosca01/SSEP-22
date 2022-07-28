@@ -369,12 +369,29 @@ world_happiness <- read_csv("/Users/abmosca/Documents/Documents/SSEP-22/data/201
 
 region_gdp <- function(ds, region_name) {
   ds %>% 
-    filter(Re)
+    filter(Region == region_name) %>%
+    summarize(mean(`Economy (GDP per Capita)`))
 }
+
+#test 
+region_gdp(world_happiness, "Western Europe")
 
 ```
      
 > Use your function to find the average GDP for each region in the dataset. 
+
+```{r}
+
+# get regions as vector 
+regions <- world_happiness %>% 
+  distinct(Region) %>%
+  pull(Region)
+
+# map 
+
+map_df(region_gdp(world_happiness, .), regions)
+
+```
 
 > Write a function that takes as input the name of a region and a number, and returns which countries in the input region have a Generosity score greater than the input number. 
      
