@@ -390,51 +390,44 @@ Now let's try building a few visualizations of your own. Try answering these que
 #. Store the scatterplot that you created in the previous exercise as an object called `home_value_plot`.
 ```{r}
 # sample solution
-      home_value_plot <- ggplot(hp2013Q1,
-      aes(y = Home.Value, x = Land.Value)) + 
-    geom_point()
+home_value_plot <- ggplot(hp2013Q1, 
+                          aes(y = Home.Value, x = Land.Value)) + 
+  geom_point()
 ```
 #. In your `home_value_plot`, map color to the cost of the structure and show your scatterplot.
 ```{r}
 # sample solution
-      home_value_plot + 
-      aes(color = Structure.Cost) + 
-      geom_point()
+home_value_plot + 
+      aes(color = Structure.Cost) 
 ```
 #. Let's return to p4. Since a home price index of 1 is an important benchmark, it is worth
 highlighting as contextual reference in our plot. Use `geom_vline()` to add a dotted, black, vertical line to p4.
 ```{r}
 # sample solution
 p4 + 
-      scale_color_gradient2(breaks = c(1975.25, 1994.25, 2013.25),
-                        labels = c(1971, 1994, 2013),
-                        low = "blue",
-                        high = "red",
-                        mid = "gray60",
-                        midpoint = 1994.25) + 
       geom_hline(yintercept = 1, linetype = 3, color = "black")
 ```
 #. Recall that layers in ggplot2 are added sequentially. How would you put the dotted horizontal line you created in the previous exercise **behind** the data values?
 ```{r}
 # sample solution
-p4 + 
+p4v2 <- p3 + 
   geom_hline(yintercept = 1, linetype = 3, color = "black") + 
-  scale_color_gradient2(breaks = c(1975.25, 1994.25, 2013.25),
-                        labels = c(1971, 1994, 2013),
-                        low = "blue",
-                        high = "red",
-                        mid = "gray60",
-                        midpoint = 1994.25) 
+  geom_point(aes(color = Date),
+                      alpha = 0.5,
+                      size = 1.5,
+                      position = position_jitter(width = 0.25, height = 0))
+  
+p4v2
 ```
 
 #. Use a `facet_wrap` to create a data graphic of your choice that illustrates something interesting about home prices.
 ```{r}
 # sample solution
-    ggplot(housing, aes(x = Date, y = Home.Price.Index, color = State)) + 
-      geom_hline(aes(yintercept = 1), linetype = 3, color = "black") + 
-      geom_point(alpha = 0.1) +
-      geom_line() + 
-      facet_wrap(~region)
+ggplot(housing, aes(x = Date, y = Home.Price.Index, color = State)) + 
+  geom_hline(aes(yintercept = 1), linetype = 3, color = "black") + 
+  geom_point(alpha = 0.1) +
+  geom_line() + 
+  facet_wrap(~region)
 ```
 
 <div id="license">
