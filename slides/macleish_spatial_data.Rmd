@@ -1,0 +1,179 @@
+---
+title: "MacLeish Layers"
+author: "Esa Schenck"
+date: '2022-08-02'
+output: slidy_presentation
+---
+
+# Intro to MacLeish
+
+
+This package is maintained by Ben Baumer (a Smith professor) and was created by:
+
+ - Ben Baumer 
+ - Rose Goueth
+ - Wencong Li 
+ - Weijia Zhang 
+ - Nicholas Horton
+ - Dominique Kelly 
+ - Albert Y. Kim
+ 
+This presentation was adapted from a lab created by Ben Baumer.
+
+---
+
+# Getting Set Up 
+
+
+
+```{r setup, echo=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE)
+```
+
+We're going to use the packages `tidyverse`, `macleish`, and `sf`.
+
+```{r echo = TRUE}
+library(tidyverse)
+library(macleish)
+library(sf)
+```
+
+# How do we use the `macleish` package?
+
+The data included in this package are:
+
+ - etl_extract.etl_macleish
+ - macleish_layers
+ - maple_sap 
+ - mass_gis
+ - phenocam_image_url
+ - tree_diameter1
+ - tree_diameter2 
+ - whately_2015
+ 
+Let's explore a couple of those.
+
+# `tree_diameter1`
+
+Let's view some data from `tree_diameter1`
+
+```{r}
+library(knitr)
+
+tree_diameter1 <- tree_diameter1 %>% 
+  select(-module, -tag, -notes) %>% 
+  filter(!is.na(diameter))
+
+head(tree_diameter1)
+```
+
+# Summary of `tree_diameter1`
+
+```{r}
+summary(tree_diameter1)
+```
+
+# Working with Spatial Data
+
+We're already familiar with data such as that found in `tree_diameter1`, but so far in this class we haven't worked with spatial data.
+
+## What IS spatial data?
+
+Spatial data describes locations and geography -- i.e., the physical SPACE in which we live.
+
+## How do we use spatial data?
+
+We can analyze spatial data with the `sf` package in R. `sf` adds options to `ggplot2`, meaning that you can create a `geom_sf()` object in ggplot.
+
+# `macleish_layers` and `pluck()`
+
+The package `macleish` contains a list which stores the spatial data. This list is called `macleish_layers`. To access these spatial layers, we use the `pluck()` function.
+
+The layers stored here are:
+
+ - landmarks
+ - forests
+ - streams
+ - challenge_courses
+ - buildings
+ - wetlands
+ - boundary
+ - research
+ - soil
+ - trails
+ - camp_sites
+ - elevation
+  
+
+# MacLeish Trails
+
+````{r echo = TRUE}
+macleish_layers %>% 
+  pluck("trails")
+```
+
+# Mapping MacLeish trails with plot()
+
+We can use the plot() function to make a basic plot of a layer, such as trails.
+
+```{r echo = TRUE}
+macleish_layers %>% 
+  pluck("trails") %>% 
+  plot()
+```
+
+# Mapping with geom_sf()
+
+Once you've plucked a layer, you can add a `geom_sf()` object.
+
+```{r echo = TRUE}
+macleish_layers %>%
+  pluck("buildings") %>%
+  ggplot() +
+  geom_sf()
+```
+
+# Mapping more than one object
+
+Instead of piping, use the `data` argument in each `geom_sf()`. This plot shows both the buildings and trails of MacLeish:
+
+```{r echo = TRUE}
+ggplot() +
+  geom_sf(data = pluck(macleish_layers, "buildings")) +
+  geom_sf(data = pluck(macleish_layers, "trails"), color = "black")
+```
+
+# Creating interactive maps with `leaflet`
+
+Here we create the spatial object bechtel, to represent the Bechtel Environmental Classroom, and then create a leaflet interactive map with a popup marker.
+
+```{r echo = TRUE}
+library(leaflet)
+
+# latitude and longitude of the Bechtel Classroom
+bechtel <- tibble(lat = 42.449167, lon = -72.679389)
+
+base_plot <- leaflet() %>%
+  addTiles() %>%                                    # creates the map
+  addMarkers(                                       # creates a marker on the classroom
+    lng = ~lon, lat = ~lat, data = bechtel,         # lat and long of the classroom from "bechtel"
+    popup = "Bechtel Environmental Classroom"       # label
+  )
+```
+
+# Bechtel Environmental Classroom
+
+```{r}
+base_plot
+```
+
+# Add polygons to view more of the data
+
+```{r echo = TRUE}
+base_plot %>%                                 # base_plot is the interactive map
+  addPolygons(                                # polygons are layers of spatial data
+    data = macleish_layers[["trails"]],       # using the trail data
+    weight = 1, popup = ~name
+  ) 
+```
+
